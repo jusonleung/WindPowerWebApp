@@ -1,0 +1,43 @@
+﻿@inject SqlDbService sqlDbService
+@page "/SystemData"
+
+<PageTitle>SystemData</PageTitle>
+
+<Table TItem="DataModel"
+       DataSource="@data"
+       Total="_total"
+       @bind-PageIndex="_pageIndex"
+       @bind-PageSize="_pageSize">
+    <PropertyColumn Property="c=>c.DateTime" Sortable Format="yyyy-MM-dd HH:mm:ss"/>
+    <PropertyColumn Title="Voltage" Property="c=>c.Voltage" Sortable>
+        <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString()+'V')</CellRender>
+    </PropertyColumn>
+    <PropertyColumn Title="Current" Property="c=>c.Current" Sortable>
+        <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString()+'A')</CellRender>
+    </PropertyColumn>
+    <PropertyColumn Title="Power" Property="c=>c.Current*c.Voltage" Sortable>
+        <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString()+'W')</CellRender>
+    </PropertyColumn>
+    <PropertyColumn Title="Revolutions per minute" Property="c=>c.RPM" Sortable>
+        <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString()+"rpm")</CellRender>
+    </PropertyColumn>
+    <PropertyColumn Title="WindSpeed" Property="c=>c.WindSpeed" Sortable>
+        <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString()+"m/s")</CellRender>
+    </PropertyColumn>
+</Table>
+
+@code {
+    List<DataModel> data;
+
+    ITable table;
+
+    int _pageIndex = 1;
+    int _pageSize = 10;
+    int _total = 0;
+
+    protected override void OnInitialized()
+    {
+        data = sqlDbService.GetAllSystemData();
+        _total = data.Count;
+    }
+}

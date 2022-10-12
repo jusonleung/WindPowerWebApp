@@ -1,0 +1,130 @@
+﻿@inject SqlDbService sqlDbService
+
+@page "/SystemControl"
+
+<PageTitle>SystemControl</PageTitle>
+
+<div>
+    <GridRow>
+        <GridCol Span="6">
+            <h3>Pitch Angle</h3>
+            <h5>
+                Auto Mode
+                <Switch CheckedChildren="On" UnCheckedChildren="Off" Checked="@_pitchAutoSwitch" Loading="@_isPitchModeLoading" Control OnClick="pitchModeSwitch" />
+            </h5>
+            <br />
+            Angle adjust
+            <Col Span="12">
+            <Slider Disabled="@_pitchAutoSwitch" TValue="double" Min="1" Max="20" @bind-Value="@pitchValue" />
+            </Col>
+            <Col Span="4">
+            <AntDesign.InputNumber Disabled="@_pitchAutoSwitch" Min="1" Max="20" Style="margin:0 16px;" @bind-Value="@pitchValue" TValue="double" />
+            </Col>
+            <Col Span="4">
+            <div style="margin-top: 12px;">
+                <Popconfirm Placement="@Placement.Right" Title="@_title" OkText="@_okText" CancelText="@_cancelText" OnConfirm="pitchControlComfirm">
+                    <Button Disabled="@_pitchAutoSwitch" Type="@ButtonType.Primary"
+                            Loading="@_isPitchControlLoading">
+                        Comfirm
+                    </Button>
+                </Popconfirm>
+            </div>
+            </Col>
+        </GridCol>
+
+        <GridCol Span="6">
+            <h3>Break</h3>
+            <h5>
+                Auto Mode
+                <Switch CheckedChildren="On" UnCheckedChildren="Off" Checked="@_breakAutoSwitch" Loading="@_isBreakModeLoading" Control OnClick="breakModeSwitch" />
+            </h5>
+            <br />
+            Break power
+            <Col Span="12">
+            <Slider Disabled="@_breakAutoSwitch" TValue="double" Min="1" Max="20" @bind-Value="@breakValue" />
+            </Col>
+            <Col Span="4">
+            <AntDesign.InputNumber Disabled="@_breakAutoSwitch" Min="1" Max="20" Style="margin:0 16px;" @bind-Value="@breakValue" TValue="double" />
+            </Col>
+            <Col Span="4">
+            <div style="margin-top: 12px;">
+                <Popconfirm Placement="@Placement.Right" Title="@_title" OkText="@_okText" CancelText="@_cancelText" OnConfirm="breakControlComfirm">
+                    <Button Disabled="@_breakAutoSwitch" Type="@ButtonType.Primary"
+                            Loading="@_isBreakControlLoading">
+                        Comfirm
+                    </Button>
+                </Popconfirm>
+            </div>
+            </Col>
+        </GridCol>
+        <Divider />
+        <Descriptions Title="Current status" Bordered>
+            <DescriptionsItem Title="DateTime" Span="3">@data.DateTime</DescriptionsItem>
+            <DescriptionsItem Title="Voltage">@(data.Voltage)V</DescriptionsItem>
+            <DescriptionsItem Title="Current">@(data.Current)A</DescriptionsItem>
+            <DescriptionsItem Title="Power">@(data.Voltage*data.Current)W</DescriptionsItem>
+            <DescriptionsItem Title="Revolution Per Minute">@(data.Voltage)rpm</DescriptionsItem>
+            <DescriptionsItem Title="Wind Speed">@(data.Voltage)m/s</DescriptionsItem>
+        </Descriptions>
+
+    </GridRow>
+</div>
+
+@code {
+    DataModel data;
+    protected override void OnInitialized()
+    {
+        data = sqlDbService.GetLatestSystemData();
+    }
+
+    private string _cancelText = "No";
+    private string _okText = "Yes";
+    private string _title = "Are you sure?";
+
+    bool _pitchAutoSwitch;
+    bool _isPitchModeLoading = false;
+    bool _isPitchControlLoading;
+    double pitchValue;
+    async Task pitchModeSwitch()
+    {
+        if (!_isPitchModeLoading)
+        {
+            _isPitchModeLoading = true;
+            await Task.Delay(1000);
+            _pitchAutoSwitch = !_pitchAutoSwitch;
+            _isPitchModeLoading = false;
+        }
+    }
+
+    private async Task pitchControlComfirm()
+    {
+        _isPitchControlLoading = true;
+        await Task.Delay(1000);
+        _isPitchControlLoading = false;
+    }
+
+    bool _breakAutoSwitch;
+    bool _isBreakModeLoading = false;
+    bool _isBreakControlLoading;
+    double breakValue;
+    async Task breakModeSwitch()
+    {
+        if (!_isBreakModeLoading)
+        {
+            _isBreakModeLoading = true;
+            await Task.Delay(1000);
+            _breakAutoSwitch = !_breakAutoSwitch;
+            _isBreakModeLoading = false;
+        }
+    }
+
+    private async Task breakControlComfirm()
+    {
+        _isBreakControlLoading = true;
+        await Task.Delay(1000);
+        _isBreakControlLoading = false;
+    }
+
+
+}
+

@@ -1,0 +1,42 @@
+﻿@inject NavigationManager NavManager
+@inject Blazored.LocalStorage.ILocalStorageService localStorageService
+
+@inherits LayoutComponentBase
+
+<div class="page">
+    <AuthorizeView>
+        <Authorized>
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+
+            <main>
+                <div class="top-row px-4">
+                    <a onclick="@Logout">Logout</a>
+                </div>
+
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
+        </Authorized>
+        <NotAuthorized>
+            <div style="position: fixed;
+                        top: 30%;
+                        left: 50%;
+                        -webkit-transform: translate(-50%, -50%);
+                        transform: translate(-50%, -50%);
+                        ">
+                <LoginView />
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+
+@code{
+    private void Logout()
+    {
+        localStorageService.ClearAsync();
+        NavManager.NavigateTo("", forceLoad: true);
+    }
+}
