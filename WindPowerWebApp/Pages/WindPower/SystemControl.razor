@@ -59,6 +59,13 @@
         </GridCol>
         <Divider />
         <Descriptions Title="Current status" Bordered>
+            <DescriptionsItem Title="Status" Span="3">
+                @if(isOnline){
+                    <span style="color:green"><a style="font-size:large">●</a> online</span>
+                }else{
+                    <span style="color:red">● offline</span>
+                }
+                </DescriptionsItem>
             <DescriptionsItem Title="DateTime" Span="3">@data.DateTime</DescriptionsItem>
             <DescriptionsItem Title="Voltage">@(data.Voltage)V</DescriptionsItem>
             <DescriptionsItem Title="Current">@(data.Current)A</DescriptionsItem>
@@ -71,10 +78,14 @@
 </div>
 
 @code {
+    
+
+    bool isOnline;
     DataModel data;
     protected override void OnInitialized()
     {
         data = sqlDbService.GetLatestSystemData();
+        isOnline = true;
     }
 
     private string _cancelText = "No";
