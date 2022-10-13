@@ -8,5 +8,10 @@
         public float? Current { get; set; }
         public float? RPM { get; set; }
         public float? WindSpeed { get; set; }
+
+        public string NullorAddUnit(object obj, string unit)
+        {
+            return obj == null ? "==" : obj.ToString() + unit;
+        }
     }
 }

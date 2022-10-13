@@ -18,7 +18,7 @@ namespace WindPowerWebApp.Data
         {
             using (var conn = new SqlConnection(WindPowerDbConStr))
             {
-                var result = conn.Query<DataModel>("SELECT * FROM [dbo].[SystamData] Order by [DateTime]").ToList();
+                var result = conn.Query<DataModel>("SELECT * FROM [dbo].[SystemData] Order by [DateTime]").ToList();
                 return result;
             }
         }
@@ -27,7 +27,7 @@ namespace WindPowerWebApp.Data
         {
             using (var conn = new SqlConnection(WindPowerDbConStr))
             {
-                var result = conn.Query<DataModel>("SELECT TOP (1) * FROM [dbo].[SystamData] Order by [DateTime] DESC").SingleOrDefault();
+                var result = conn.Query<DataModel>("SELECT TOP (1) * FROM [dbo].[SystemData] Order by [DateTime] DESC").SingleOrDefault();
                 return result;
             }
         }

@@ -59,22 +59,34 @@
         </GridCol>
         <Divider />
         <Descriptions Title="Current status" Bordered>
-            <DescriptionsItem Title="DateTime" Span="3">@data.DateTime</DescriptionsItem>
-            <DescriptionsItem Title="Voltage">@(data.Voltage)V</DescriptionsItem>
-            <DescriptionsItem Title="Current">@(data.Current)A</DescriptionsItem>
-            <DescriptionsItem Title="Power">@(data.Voltage*data.Current)W</DescriptionsItem>
-            <DescriptionsItem Title="Revolution Per Minute">@(data.Voltage)rpm</DescriptionsItem>
-            <DescriptionsItem Title="Wind Speed">@(data.Voltage)m/s</DescriptionsItem>
+            <DescriptionsItem Title="Status" Span="3">
+                @if (isOnline)
+                {
+                    <span style="color:green"><a style="font-size:large">●</a> online</span>
+                }
+                else
+                {
+                    <span style="color:red">● offline</span>
+                }
+            </DescriptionsItem>
+            <DescriptionsItem Title="DateTime" Span="3">@data.DateTime.ToString("yyyy-MM-dd HH:mm:ss")</DescriptionsItem>
+            <DescriptionsItem Title="Voltage">@data.NullorAddUnit(data.Voltage,"V")</DescriptionsItem>
+            <DescriptionsItem Title="Current">@data.NullorAddUnit(data.Current,"A")</DescriptionsItem>
+            <DescriptionsItem Title="Power">@data.NullorAddUnit(data.Voltage*data.Current,"W")</DescriptionsItem>
+            <DescriptionsItem Title="Revolution Per Minute">@data.NullorAddUnit(data.Voltage,"rpm")</DescriptionsItem>
+            <DescriptionsItem Title="Wind Speed">@data.NullorAddUnit(data.Voltage,"m/s")</DescriptionsItem>
         </Descriptions>
 
     </GridRow>
 </div>
 
 @code {
+    bool isOnline;
     DataModel data;
     protected override void OnInitialized()
     {
         data = sqlDbService.GetLatestSystemData();
+        isOnline = true;
     }
 
     private string _cancelText = "No";
@@ -124,7 +136,6 @@
         await Task.Delay(1000);
         _isBreakControlLoading = false;
     }
-
 
 }
 
