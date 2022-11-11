@@ -1,8 +1,11 @@
 ﻿@inject SqlDbService sqlDbService
+@inject ExcelService excelService
+@inject Microsoft.JSInterop.IJSRuntime JS
+
 @page "/SystemData"
 
-<PageTitle>SystemData</PageTitle>
 
+<button class="btn btn-primary" @onclick="@CreateExcel">Download</button>
 <Table TItem="DataModel"
        DataSource="@data"
        Total="_total"
@@ -39,5 +42,16 @@
     {
         data = sqlDbService.GetAllSystemData();
         _total = data.Count;
+    }
+
+    MemoryStream excelStream;
+
+    /// <summary>
+    /// Create and download the Excel document.
+    /// </summary>
+    protected async void CreateExcel()
+    {
+        excelStream = excelService.CreateExcel(data);
+        await JS.SaveAs("SystemData.xlsx", excelStream.ToArray());
     }
 }
