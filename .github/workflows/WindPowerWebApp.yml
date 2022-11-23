@@ -19,6 +19,7 @@ env:
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 6.0.x
   WORKING_DIRECTORY: WindPowerWebApp
+  PROJECT_FILE: WindPowerWebApp/WindPowerWebApp.csproj
 jobs:
   build:
     runs-on: windows-latest
