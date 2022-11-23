@@ -1,10 +1,12 @@
-﻿using System.ComponentModel;
+﻿using SqlSugar;
+using System.ComponentModel;
 
 namespace WindPowerWebApp.Model
 {
+    [SugarTable("SystemData")]
     public class DataModel
     {
-        
+
         [DisplayName("Voltage (W)")]
         public float? Voltage { get; set; }
         [DisplayName("Current (A)")]
@@ -13,7 +15,7 @@ namespace WindPowerWebApp.Model
         public float? RPM { get; set; }
         [DisplayName("WindSpeed (m/s)")]
         public float? WindSpeed { get; set; }
-        
+
         [DisplayName("Date time")]
         public DateTime DateTime { get; set; }
 

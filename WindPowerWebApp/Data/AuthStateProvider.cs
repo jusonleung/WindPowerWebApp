@@ -45,13 +45,13 @@ namespace WindPowerWebApp.Data
 
 
         public List<LoginModel> Admins = new List<LoginModel>
-    {
-        new LoginModel
-        {
-            Username = "admin",
-            Password = "admin"
-        }
-    };
+            {
+                new LoginModel
+                {
+                    Username = "admin",
+                    Password = "admin"
+                }
+            };
 
         public LoginModel GetAdmin(string username, string password)
         {

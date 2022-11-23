@@ -1,6 +1,7 @@
 ﻿using WindPowerWebApp.Model;
 using System.Data.SqlClient;
 using Dapper;
+using SqlSugar;
 
 namespace WindPowerWebApp.Data
 {
@@ -8,10 +9,18 @@ namespace WindPowerWebApp.Data
     {
         private readonly IConfiguration Configuration;
         private readonly string WindPowerDbConStr;
+        private SqlSugarClient sqlSugarClient;
+
         public SqlDbService(IConfiguration configuration)
         {
             Configuration = configuration;
             WindPowerDbConStr = Configuration.GetConnectionString("WindPowerDb");
+            sqlSugarClient = new SqlSugarClient(new ConnectionConfig()
+            {
+                ConnectionString = WindPowerDbConStr,
+                DbType = DbType.SqlServer,
+                IsAutoCloseConnection = true
+            });
         }
 
         public List<DataModel> GetAllSystemData()
@@ -30,6 +39,11 @@ namespace WindPowerWebApp.Data
                 var result = conn.Query<DataModel>("SELECT TOP (1) * FROM [dbo].[SystemData] Order by [DateTime] DESC").SingleOrDefault();
                 return result;
             }
+        }
+
+        public void AddSystemData(List<DataModel> dataList)
+        {
+            sqlSugarClient.Insertable(dataList).ExecuteCommand();
         }
     }
 }
