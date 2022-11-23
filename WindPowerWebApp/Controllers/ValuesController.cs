@@ -7,12 +7,12 @@ using WindPowerWebApp.Model;
 
 namespace WindPowerWebApp.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api")]
     [ApiController]
     public class ValuesController : ControllerBase
     {
         // GET: api/<ValuesController>
-        [HttpGet]
+        [HttpGet("get")]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
