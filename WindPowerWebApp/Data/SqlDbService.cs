@@ -2,18 +2,24 @@
 using System.Data.SqlClient;
 using Dapper;
 using SqlSugar;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace WindPowerWebApp.Data
 {
     public class SqlDbService
     {
-        private SqlSugarClient sqlSugarClient;
+        string sqlConnectionString;
 
         public SqlDbService(IConfiguration configuration)
         {
-            sqlSugarClient = new SqlSugarClient(new ConnectionConfig()
+            sqlConnectionString = configuration.GetConnectionString("WindPowerDb");
+        }
+
+        SqlSugarClient GetSqlSugarClient()
+        {
+            return new SqlSugarClient(new ConnectionConfig()
             {
-                ConnectionString = configuration.GetConnectionString("WindPowerDb"),
+                ConnectionString = sqlConnectionString,
                 DbType = DbType.SqlServer,
                 IsAutoCloseConnection = true
             });
@@ -21,18 +27,18 @@ namespace WindPowerWebApp.Data
 
         public List<DataModel> GetAllSystemData()
         {
-            return sqlSugarClient.Queryable<DataModel>().ToList();
+            return GetSqlSugarClient().Queryable<DataModel>().ToList();
         }
 
         public DataModel GetLatestSystemData()
         {
-            return sqlSugarClient.Queryable<DataModel>().OrderBy(d => d.DateTime, OrderByType.Desc).First();
+            return GetSqlSugarClient().Queryable<DataModel>().OrderBy(d => d.DateTime, OrderByType.Desc).First();
         }
 
         public void AddSystemData(List<DataModel> dataList)
         {
             dataList.ForEach(d => { if (d.DateTime > DateTime.Now) dataList.Remove(d); });
-            sqlSugarClient.Insertable(dataList).ExecuteCommand();
+            GetSqlSugarClient().Insertable(dataList).ExecuteCommand();
         }
     }
 }

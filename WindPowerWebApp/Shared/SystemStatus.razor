@@ -1,0 +1,67 @@
+﻿@inject SqlDbService sqlDbService
+
+<Descriptions Title="Current status" Bordered>
+    <DescriptionsItem Title="Status" Span="1">
+        @if (isOnline)
+        {
+            <span style="color:green"><a style="font-size:large">●</a> online</span>
+        }
+        else
+        {
+            <span style="color:red">● offline</span>
+        }
+    </DescriptionsItem>
+    <DescriptionsItem Title="DateTime" Span="2">@data.DateTime.ToString("yyyy-MM-dd HH:mm:ss")</DescriptionsItem>
+    <DescriptionsItem Title="Voltage">@data.NullorAddUnit(data.Voltage,"V")</DescriptionsItem>
+    <DescriptionsItem Title="Current">@data.NullorAddUnit(data.Current,"A")</DescriptionsItem>
+    <DescriptionsItem Title="Power">@data.NullorAddUnit(data.Voltage*data.Current,"W")</DescriptionsItem>
+    <DescriptionsItem Title="RPM">@data.NullorAddUnit(data.Voltage,"rpm")</DescriptionsItem>
+    <DescriptionsItem Title="Wind Speed">@data.NullorAddUnit(data.Voltage,"m/s")</DescriptionsItem>
+</Descriptions>
+@onlineCheckCount
+
+@code {
+    bool isOnline;
+    int onlineCheckCount = 0;
+    DataModel data;
+    static System.Timers.Timer _timer;
+    protected override void OnInitialized()
+    {
+        data = sqlDbService.GetLatestSystemData();
+        _timer = new System.Timers.Timer(1000);
+        _timer.Elapsed += RefreshStatus;
+        _timer.Enabled = true;
+    }
+
+    public async void RefreshStatus(Object source, System.Timers.ElapsedEventArgs e)
+    {
+        var newdata = sqlDbService.GetLatestSystemData();
+        if (data.DateTime == newdata.DateTime)
+            onlineCheckCount++;
+        else
+        {
+            data = newdata;
+            isOnline = true;
+            onlineCheckCount = 0;
+        }
+
+
+        if (onlineCheckCount >= 5)
+        {
+            onlineCheckCount = 0;
+            isOnline = false;
+        }
+
+        await InvokeAsync(async () =>
+        {
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+
+}
+
