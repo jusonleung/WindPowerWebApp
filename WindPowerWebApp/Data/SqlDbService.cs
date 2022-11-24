@@ -7,17 +7,13 @@ namespace WindPowerWebApp.Data
 {
     public class SqlDbService
     {
-        private readonly IConfiguration Configuration;
-        private readonly string WindPowerDbConStr;
         private SqlSugarClient sqlSugarClient;
 
         public SqlDbService(IConfiguration configuration)
         {
-            Configuration = configuration;
-            WindPowerDbConStr = Configuration.GetConnectionString("WindPowerDb");
             sqlSugarClient = new SqlSugarClient(new ConnectionConfig()
             {
-                ConnectionString = WindPowerDbConStr,
+                ConnectionString = configuration.GetConnectionString("WindPowerDb"),
                 DbType = DbType.SqlServer,
                 IsAutoCloseConnection = true
             });
@@ -25,24 +21,17 @@ namespace WindPowerWebApp.Data
 
         public List<DataModel> GetAllSystemData()
         {
-            using (var conn = new SqlConnection(WindPowerDbConStr))
-            {
-                var result = conn.Query<DataModel>("SELECT * FROM [dbo].[SystemData] Order by [DateTime]").ToList();
-                return result;
-            }
+            return sqlSugarClient.Queryable<DataModel>().ToList();
         }
 
         public DataModel GetLatestSystemData()
         {
-            using (var conn = new SqlConnection(WindPowerDbConStr))
-            {
-                var result = conn.Query<DataModel>("SELECT TOP (1) * FROM [dbo].[SystemData] Order by [DateTime] DESC").SingleOrDefault();
-                return result;
-            }
+            return sqlSugarClient.Queryable<DataModel>().OrderBy(d => d.DateTime, OrderByType.Desc).First();
         }
 
         public void AddSystemData(List<DataModel> dataList)
         {
+            dataList.ForEach(d => { if (d.DateTime > DateTime.Now) dataList.Remove(d); });
             sqlSugarClient.Insertable(dataList).ExecuteCommand();
         }
     }
