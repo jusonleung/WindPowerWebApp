@@ -35,10 +35,9 @@ namespace WindPowerWebApp.Data
             return GetSqlSugarClient().Queryable<DataModel>().OrderBy(d => d.DateTime, OrderByType.Desc).First();
         }
 
-        public void AddSystemData(List<DataModel> dataList)
+        public void AddSystemData(DataModel data)
         {
-            dataList.ForEach(d => { if (d.DateTime > DateTime.Now) dataList.Remove(d); });
-            GetSqlSugarClient().Insertable(dataList).ExecuteCommand();
+            GetSqlSugarClient().Insertable(data).ExecuteCommand();
         }
     }
 }

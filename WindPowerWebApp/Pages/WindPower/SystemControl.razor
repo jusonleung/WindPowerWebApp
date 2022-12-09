@@ -4,64 +4,66 @@
 
 <PageTitle>SystemControl</PageTitle>
 
-<div>
-    <GridRow>
-        <GridCol Span="6">
-            <h3>Pitch Angle</h3>
-            <h5>
-                Auto Mode
-                <Switch CheckedChildren="On" UnCheckedChildren="Off" Checked="@_pitchAutoSwitch" Loading="@_isPitchModeLoading" Control OnClick="pitchModeSwitch" />
-            </h5>
-            <br />
-            Angle adjust
-            <Col Span="12">
-            <Slider Disabled="@_pitchAutoSwitch" TValue="double" Min="1" Max="20" @bind-Value="@pitchValue" />
-            </Col>
-            <Col Span="4">
-            <AntDesign.InputNumber Disabled="@_pitchAutoSwitch" Min="1" Max="20" Style="margin:0 16px;" @bind-Value="@pitchValue" TValue="double" />
-            </Col>
-            <Col Span="4">
-            <div style="margin-top: 12px;">
-                <Popconfirm Placement="@Placement.Right" Title="@_title" OkText="@_okText" CancelText="@_cancelText" OnConfirm="pitchControlComfirm">
-                    <Button Disabled="@_pitchAutoSwitch" Type="@ButtonType.Primary"
-                            Loading="@_isPitchControlLoading">
-                        Comfirm
-                    </Button>
-                </Popconfirm>
-            </div>
-            </Col>
-        </GridCol>
 
-        <GridCol Span="6">
-            <h3>Break</h3>
-            <h5>
-                Auto Mode
-                <Switch CheckedChildren="On" UnCheckedChildren="Off" Checked="@_breakAutoSwitch" Loading="@_isBreakModeLoading" Control OnClick="breakModeSwitch" />
-            </h5>
-            <br />
-            Break power
-            <Col Span="12">
-            <Slider Disabled="@_breakAutoSwitch" TValue="double" Min="1" Max="20" @bind-Value="@breakValue" />
-            </Col>
-            <Col Span="4">
-            <AntDesign.InputNumber Disabled="@_breakAutoSwitch" Min="1" Max="20" Style="margin:0 16px;" @bind-Value="@breakValue" TValue="double" />
-            </Col>
-            <Col Span="4">
-            <div style="margin-top: 12px;">
-                <Popconfirm Placement="@Placement.Right" Title="@_title" OkText="@_okText" CancelText="@_cancelText" OnConfirm="breakControlComfirm">
-                    <Button Disabled="@_breakAutoSwitch" Type="@ButtonType.Primary"
-                            Loading="@_isBreakControlLoading">
-                        Comfirm
-                    </Button>
-                </Popconfirm>
-            </div>
-            </Col>
-        </GridCol>
-        <Divider />
-        <SystemStatus></SystemStatus>
+<GridRow>
+    <GridCol Span="6">
+        <h3>Pitch Angle</h3>
+        <h5>
+            Auto Mode
+            <Switch CheckedChildren="On" UnCheckedChildren="Off" Checked="@_pitchAutoSwitch" Loading="@_isPitchModeLoading" Control OnClick="pitchModeSwitch" />
+        </h5>
+        <br />
+        Angle adjust
+        <Col Span="12">
+        <Slider Disabled="@_pitchAutoSwitch" TValue="double" Min="1" Max="20" @bind-Value="@pitchValue" />
+        </Col>
+        <Col Span="4">
+        <AntDesign.InputNumber Disabled="@_pitchAutoSwitch" Min="1" Max="20" Style="margin:0 16px;" @bind-Value="@pitchValue" TValue="double" />
+        </Col>
+        <Col Span="4">
+        <div style="margin-top: 12px;">
+            <Popconfirm Placement="@Placement.Right" Title="@_title" OkText="@_okText" CancelText="@_cancelText" OnConfirm="pitchControlComfirm">
+                <Button Disabled="@_pitchAutoSwitch" Type="@ButtonType.Primary"
+                        Loading="@_isPitchControlLoading">
+                    Comfirm
+                </Button>
+            </Popconfirm>
+        </div>
+        </Col>
+    </GridCol>
 
-    </GridRow>
-</div>
+    <GridCol Span="6">
+        <h3>Break</h3>
+        <h5>
+            Auto Mode
+            <Switch CheckedChildren="On" UnCheckedChildren="Off" Checked="@_breakAutoSwitch" Loading="@_isBreakModeLoading" Control OnClick="breakModeSwitch" />
+        </h5>
+        <br />
+        Break power
+        <Col Span="12">
+        <Slider Disabled="@_breakAutoSwitch" TValue="double" Min="1" Max="20" @bind-Value="@breakValue" />
+        </Col>
+        <Col Span="4">
+        <AntDesign.InputNumber Disabled="@_breakAutoSwitch" Min="1" Max="20" Style="margin:0 16px;" @bind-Value="@breakValue" TValue="double" />
+        </Col>
+        <Col Span="4">
+        <div style="margin-top: 12px;">
+            <Popconfirm Placement="@Placement.Right" Title="@_title" OkText="@_okText" CancelText="@_cancelText" OnConfirm="breakControlComfirm">
+                <Button Disabled="@_breakAutoSwitch" Type="@ButtonType.Primary"
+                        Loading="@_isBreakControlLoading">
+                    Comfirm
+                </Button>
+            </Popconfirm>
+        </div>
+        </Col>
+    </GridCol>
+    <Divider />
+
+
+</GridRow>
+
+<SystemStatus></SystemStatus>
+
 
 @code {
     private string _cancelText = "No";

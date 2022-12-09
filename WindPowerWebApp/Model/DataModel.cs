@@ -19,6 +19,10 @@ namespace WindPowerWebApp.Model
         [DisplayName("Date time")]
         public DateTime DateTime { get; set; }
 
+        public float? Latitude { get; set; }
+
+        public float? Longitude { get; set; }
+
         public string NullorAddUnit(object obj, string unit)
         {
             return obj == null ? "==" : obj.ToString() + unit;
