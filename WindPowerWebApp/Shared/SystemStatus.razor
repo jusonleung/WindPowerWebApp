@@ -23,7 +23,7 @@
 <br />
 
 <div style="height:500px">
-    <GoogleMap @ref="@map1" Id="map1" Options="@mapOptions" Height="100%"></GoogleMap>
+    <GoogleMap @ref="@map1" Id="map1" Options="@mapOptions" Height="100%" OnAfterInit="InitPosition"></GoogleMap>
 </div>
 
 @code {
@@ -64,6 +64,26 @@
         _timer.Enabled = true;
     }
 
+    public async void InitPosition()
+    {
+        marker = await Marker.CreateAsync(map1.JsRuntime, new MarkerOptions()
+            {
+                Position = position,
+                Map = map1.InteropObject
+            });
+
+        _timer.Elapsed += RefreshPosition;
+    }
+
+    public async void RefreshPosition(Object source, System.Timers.ElapsedEventArgs e)
+    {
+        if (data.Latitude.HasValue && data.Longitude.HasValue)
+        {
+            position.Lat = data.Latitude.Value;
+            position.Lng = data.Longitude.Value;
+            marker.SetPosition(position);
+        }
+    }
 
 
     public async void RefreshStatus(Object source, System.Timers.ElapsedEventArgs e)
@@ -82,28 +102,6 @@
         {
             onlineCheckCount = 0;
             isOnline = false;
-        }
-
-        if (data.Latitude.HasValue && data.Longitude.HasValue)
-        {
-            position.Lat = data.Latitude.Value;
-            position.Lng = data.Longitude.Value;
-        }
-
-        try
-        {
-            if (marker == null)
-                marker = await Marker.CreateAsync(map1.JsRuntime, new MarkerOptions()
-                    {
-                        Position = position,
-                        Map = map1.InteropObject
-                    });
-            else
-                marker.SetPosition(position);
-        }
-        catch (JSDisconnectedException ex)
-        {
-            NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
         }
 
         await InvokeAsync(async () =>
