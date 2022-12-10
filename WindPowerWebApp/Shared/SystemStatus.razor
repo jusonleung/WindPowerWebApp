@@ -1,28 +1,24 @@
 ﻿@inject SqlDbService sqlDbService
 @inject NavigationManager NavigationManager
 
-@if (isOnline)
-{
-    <Descriptions Title="Current status" Bordered>
-        <DescriptionsItem Title="Status" Span="1">
+<Descriptions Title="Latest status" Bordered>
+    <DescriptionsItem Title="Status" Span="1">
+        @if (isOnline)
+        {
             <span style="color:green"><a style="font-size:large">●</a> online</span>
-        </DescriptionsItem>
-        <DescriptionsItem Title="DateTime" Span="2">@data.DateTime.ToString("yyyy-MM-dd HH:mm:ss")</DescriptionsItem>
-        <DescriptionsItem Title="Voltage">@data.NullorAddUnit(data.Voltage,"V")</DescriptionsItem>
-        <DescriptionsItem Title="Current">@data.NullorAddUnit(data.Current,"A")</DescriptionsItem>
-        <DescriptionsItem Title="Power">@data.NullorAddUnit(data.Voltage*data.Current,"W")</DescriptionsItem>
-        <DescriptionsItem Title="RPM">@data.NullorAddUnit(data.Voltage,"rpm")</DescriptionsItem>
-        <DescriptionsItem Title="Wind Speed">@data.NullorAddUnit(data.Voltage,"m/s")</DescriptionsItem>
-    </Descriptions>
-}
-else
-{
-    <Descriptions Title="Current status" Bordered>
-        <DescriptionsItem Title="Status" Span="1">
+        }
+        else
+        {
             <span style="color:red">● offline</span>
-        </DescriptionsItem>
-    </Descriptions>
-}
+        }
+    </DescriptionsItem>
+    <DescriptionsItem Title="DateTime" Span="2">@data.DateTime.ToString("yyyy-MM-dd HH:mm:ss")</DescriptionsItem>
+    <DescriptionsItem Title="Voltage">@data.NullorAddUnit(data.Voltage,"V")</DescriptionsItem>
+    <DescriptionsItem Title="Current">@data.NullorAddUnit(data.Current,"A")</DescriptionsItem>
+    <DescriptionsItem Title="Power">@data.NullorAddUnit(data.Voltage*data.Current,"W")</DescriptionsItem>
+    <DescriptionsItem Title="RPM">@data.NullorAddUnit(data.Voltage,"rpm")</DescriptionsItem>
+    <DescriptionsItem Title="Wind Speed">@data.NullorAddUnit(data.Voltage,"m/s")</DescriptionsItem>
+</Descriptions>
 
 <br />
 
@@ -45,15 +41,16 @@ else
     protected async override void OnInitialized()
     {
         data = sqlDbService.GetLatestSystemData();
-        _timer = new System.Timers.Timer(1000);
-        _timer.Elapsed += RefreshStatus;
-        _timer.Enabled = true;
-
-        position = new LatLngLiteral()
-            {
-                Lat = 22.302711,
-                Lng = 114.177216
-            };
+        if (data.Latitude.HasValue && data.Longitude.HasValue)
+            position = new LatLngLiteral()
+                {
+                    Lat = data.Latitude.Value,
+                    Lng = data.Longitude.Value
+                };
+        else
+        {
+            position = sqlDbService.GetLastestPosition();
+        }
 
         mapOptions = new MapOptions()
             {
@@ -61,6 +58,10 @@ else
                 Center = position,
                 MapTypeId = MapTypeId.Roadmap
             };
+
+        _timer = new System.Timers.Timer(1000);
+        _timer.Elapsed += RefreshStatus;
+        _timer.Enabled = true;
     }
 
 
@@ -83,8 +84,11 @@ else
             isOnline = false;
         }
 
-        position.Lat = data.Latitude.Value;
-        position.Lng = data.Longitude.Value;
+        if (data.Latitude.HasValue && data.Longitude.HasValue)
+        {
+            position.Lat = data.Latitude.Value;
+            position.Lng = data.Longitude.Value;
+        }
 
         try
         {

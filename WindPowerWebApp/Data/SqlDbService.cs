@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using Dapper;
 using SqlSugar;
 using DocumentFormat.OpenXml.Wordprocessing;
+using GoogleMapsComponents.Maps;
 
 namespace WindPowerWebApp.Data
 {
@@ -38,6 +39,19 @@ namespace WindPowerWebApp.Data
         public void AddSystemData(DataModel data)
         {
             GetSqlSugarClient().Insertable(data).ExecuteCommand();
+        }
+
+        public LatLngLiteral GetLastestPosition()
+        {
+            var result = GetSqlSugarClient().Queryable<DataModel>()
+                .OrderBy(d => d.DateTime, OrderByType.Desc)
+                .Where(d => d.Latitude != null && d.Longitude != null).First();
+
+            return new LatLngLiteral
+            {
+                Lat = result.Latitude.Value,
+                Lng = result.Longitude.Value
+            };
         }
     }
 }

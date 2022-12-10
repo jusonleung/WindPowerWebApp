@@ -5,7 +5,7 @@ namespace WindPowerWebApp.Model
 {
     public class LoginModel
     {
-        [Required, DisplayName("User Name")]
+        [Required]
         public string Username { get; set; }
         [Required]
         public string Password { get; set; }
