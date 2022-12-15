@@ -26,6 +26,8 @@
     <GoogleMap @ref="@map1" Id="map1" Options="@mapOptions" Height="100%" OnAfterInit="InitPosition"></GoogleMap>
 </div>
 
+<button onclick="@Centering">Centering</button>
+
 @code {
 
     private GoogleMap map1;
@@ -62,6 +64,11 @@
         _timer = new System.Timers.Timer(1000);
         _timer.Elapsed += RefreshStatus;
         _timer.Enabled = true;
+    }
+
+    public void Centering()
+    {
+        map1.InteropObject.SetCenter(position);
     }
 
     public async void InitPosition()

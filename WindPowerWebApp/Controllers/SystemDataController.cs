@@ -36,7 +36,7 @@ namespace WindPowerWebApp.Controllers
             try
             {
                 _sqlDbService.AddSystemData(dataModel);
-                return Ok(ClientIPAddr.ToString());
+                return Ok();
             }
             catch (Exception e)
             {
