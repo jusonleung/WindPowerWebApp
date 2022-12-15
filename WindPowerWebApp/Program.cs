@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.OpenApi.Models;
 using WindPowerWebApp.Data;
+using WindPowerWebApp.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 

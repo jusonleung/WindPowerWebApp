@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Reflection;
 
-namespace WindPowerWebApp.Data
+namespace WindPowerWebApp.Service
 {
     public class ExcelService
     {
@@ -28,7 +28,7 @@ namespace WindPowerWebApp.Data
             ws.Style.Font.SetFontSize(13);
             ws.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
             ws.Style.Alignment.WrapText = true;
-            Object obj = objs.FirstOrDefault();
+            object obj = objs.FirstOrDefault();
             // Add the model fields to the header of the excel file.
             int totalOfFields = obj.GetType().GetProperties().Length; // number of fields in the object.
             int numberOfFields = 0;
@@ -113,6 +113,6 @@ namespace WindPowerWebApp.Data
             }
             return ws;
         }
-        
+
     }
 }

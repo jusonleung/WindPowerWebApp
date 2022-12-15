@@ -5,7 +5,7 @@ using SqlSugar;
 using DocumentFormat.OpenXml.Wordprocessing;
 using GoogleMapsComponents.Maps;
 
-namespace WindPowerWebApp.Data
+namespace WindPowerWebApp.Service
 {
     public class SqlDbService
     {

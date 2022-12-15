@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Web.Http.Description;
-using WindPowerWebApp.Data;
 using WindPowerWebApp.Model;
+using WindPowerWebApp.Service;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,6 +13,7 @@ namespace WindPowerWebApp.Controllers
     public class SystemDataController : ControllerBase
     {
         private readonly SqlDbService _sqlDbService;
+        public IPAddress ClientIPAddr;
 
         public SystemDataController(SqlDbService sqlDbService)
         {
@@ -31,10 +32,11 @@ namespace WindPowerWebApp.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult Post(DataModel dataModel)
         {
+            ClientIPAddr = HttpContext.Connection.RemoteIpAddress;
             try
             {
                 _sqlDbService.AddSystemData(dataModel);
-                return Ok();
+                return Ok(ClientIPAddr.ToString());
             }
             catch (Exception e)
             {
