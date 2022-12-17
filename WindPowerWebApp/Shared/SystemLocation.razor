@@ -1,0 +1,59 @@
+﻿@inject SqlDbService sqlDbService
+
+<div style="height:800px">
+    <GoogleMap @ref="@map1" Id="map1" Options="@mapOptions" Height="100%" OnAfterInit="InitPosition"></GoogleMap>
+</div>
+
+<button onclick="@Centering">Centering</button>
+
+@code {
+    private GoogleMap map1;
+    private MapOptions mapOptions;
+    Marker marker;
+    LatLngLiteral position;
+    static System.Timers.Timer _timer;
+
+    protected override void OnInitialized()
+    {
+        position = sqlDbService.GetLastestPosition();
+
+        mapOptions = new MapOptions()
+            {
+                Zoom = 18,
+                Center = position,
+                MapTypeId = MapTypeId.Roadmap
+            };
+    }
+
+    public void Centering()
+    {
+        map1.InteropObject.SetCenter(position);
+    }
+
+    public async void InitPosition()
+    {
+        marker = await Marker.CreateAsync(map1.JsRuntime, new MarkerOptions()
+            {
+                Position = position,
+                Map = map1.InteropObject
+            });
+
+        _timer = new System.Timers.Timer(1000);
+        _timer.Elapsed += RefreshPosition;
+    }
+
+    public void RefreshPosition(Object source, System.Timers.ElapsedEventArgs e)
+    {
+        var newPosition = sqlDbService.GetLastestPosition();
+        if (position != newPosition)
+        {
+            position = newPosition;
+            marker.SetPosition(position);
+        }
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}

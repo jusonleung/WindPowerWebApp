@@ -49,8 +49,8 @@ namespace WindPowerWebApp.Service
 
             return new LatLngLiteral
             {
-                Lat = result.Latitude.Value,
-                Lng = result.Longitude.Value
+                Lat = result.Latitude.GetValueOrDefault(),
+                Lng = result.Longitude.GetValueOrDefault()
             };
         }
     }

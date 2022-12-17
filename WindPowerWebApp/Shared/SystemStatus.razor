@@ -22,12 +22,6 @@
 
 <br />
 
-<div style="height:500px">
-    <GoogleMap @ref="@map1" Id="map1" Options="@mapOptions" Height="100%" OnAfterInit="InitPosition"></GoogleMap>
-</div>
-
-<button onclick="@Centering">Centering</button>
-
 @code {
 
     private GoogleMap map1;
@@ -43,55 +37,10 @@
     protected async override void OnInitialized()
     {
         data = sqlDbService.GetLatestSystemData();
-        if (data.Latitude.HasValue && data.Longitude.HasValue)
-            position = new LatLngLiteral()
-                {
-                    Lat = data.Latitude.Value,
-                    Lng = data.Longitude.Value
-                };
-        else
-        {
-            position = sqlDbService.GetLastestPosition();
-        }
-
-        mapOptions = new MapOptions()
-            {
-                Zoom = 18,
-                Center = position,
-                MapTypeId = MapTypeId.Roadmap
-            };
-
         _timer = new System.Timers.Timer(1000);
         _timer.Elapsed += RefreshStatus;
         _timer.Enabled = true;
     }
-
-    public void Centering()
-    {
-        map1.InteropObject.SetCenter(position);
-    }
-
-    public async void InitPosition()
-    {
-        marker = await Marker.CreateAsync(map1.JsRuntime, new MarkerOptions()
-            {
-                Position = position,
-                Map = map1.InteropObject
-            });
-
-        _timer.Elapsed += RefreshPosition;
-    }
-
-    public async void RefreshPosition(Object source, System.Timers.ElapsedEventArgs e)
-    {
-        if (data.Latitude.HasValue && data.Longitude.HasValue)
-        {
-            position.Lat = data.Latitude.Value;
-            position.Lng = data.Longitude.Value;
-            marker.SetPosition(position);
-        }
-    }
-
 
     public async void RefreshStatus(Object source, System.Timers.ElapsedEventArgs e)
     {
