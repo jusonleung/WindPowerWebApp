@@ -46,6 +46,8 @@ namespace WindPowerWebApp.Service
             var result = GetSqlSugarClient().Queryable<DataModel>()
                 .OrderBy(d => d.DateTime, OrderByType.Desc)
                 .Where(d => d.Latitude != null && d.Longitude != null).First();
+            if (result == null)
+                return null;
 
             return new LatLngLiteral
             {

@@ -23,9 +23,9 @@ namespace WindPowerWebApp.Model
 
         public float? Longitude { get; set; }
 
-        public string NullorAddUnit(object obj, string unit)
+        public string NullorAddUnit(float? num, string unit)
         {
-            return obj == null ? "==" : obj.ToString() + unit;
+            return num == null ? "==" : num.Value.ToString("n3") + unit;
         }
 
     }
