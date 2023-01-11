@@ -23,19 +23,18 @@ namespace WindPowerWebApp.Controllers
         [HttpGet]
         public IEnumerable<DataModel> Get()
         {
-
             return _sqlDbService.GetAllSystemData();
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult Post(DataModel dataModel)
+        public IActionResult Post(DataModel data)
         {
-            ClientIPAddr = HttpContext.Connection.RemoteIpAddress;
             try
             {
-                _sqlDbService.AddSystemData(dataModel);
+                Data.LastestData.lastestData = data;
+                _sqlDbService.AddSystemData(data);
                 return Ok();
             }
             catch (Exception e)

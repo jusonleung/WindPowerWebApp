@@ -29,6 +29,10 @@ builder.Services.AddSingleton(p =>
 {
     return new SqlDbService(configuration);
 });
+builder.Services.AddSingleton(p =>
+{
+    return new SystemControlService(configuration);
+});
 
 var app = builder.Build();
 

@@ -15,7 +15,7 @@
 
     protected override void OnInitialized()
     {
-        position = sqlDbService.GetLastestPosition();
+        position = GetLastestPosition();
 
         mapOptions = new MapOptions()
             {
@@ -40,11 +40,12 @@
 
         _timer = new System.Timers.Timer(1000);
         _timer.Elapsed += RefreshPosition;
+        _timer.Enabled = true;
     }
 
     public void RefreshPosition(Object source, System.Timers.ElapsedEventArgs e)
     {
-        var newPosition = sqlDbService.GetLastestPosition();
+        LatLngLiteral newPosition = GetLastestPosition();
         if (position != newPosition)
         {
             position = newPosition;
@@ -55,5 +56,21 @@
     public void Dispose()
     {
         _timer?.Dispose();
+    }
+
+    LatLngLiteral GetLastestPosition()
+    {
+        LatLngLiteral position = new LatLngLiteral();
+        try
+        {
+            var data = Data.LastestData.lastestData;
+            position.Lat = data.Latitude.Value;
+            position.Lng = data.Longitude.Value;
+        }
+        catch
+        {
+            position = sqlDbService.GetLastestPosition();
+        }
+        return position;
     }
 }
