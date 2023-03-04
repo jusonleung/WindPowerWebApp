@@ -61,16 +61,7 @@
     LatLngLiteral GetLastestPosition()
     {
         LatLngLiteral position = new LatLngLiteral();
-        try
-        {
-            var data = Data.LastestData.lastestData;
-            position.Lat = data.Latitude.Value;
-            position.Lng = data.Longitude.Value;
-        }
-        catch
-        {
-            position = sqlDbService.GetLastestPosition();
-        }
+        position = sqlDbService.GetLastestPosition();
         return position;
     }
 }

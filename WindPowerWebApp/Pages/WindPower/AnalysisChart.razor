@@ -1,0 +1,16 @@
+﻿@inject SqlDbService sqlDbService
+
+@page "/AnalysisChart"
+
+<PageTitle>AnalysisChart</PageTitle>
+
+<Chart WindTurbineData="@WindTurbineData"></Chart>
+
+@code {
+    List<DataModel> WindTurbineData;
+
+    protected override void OnInitialized()
+    {
+        WindTurbineData = sqlDbService.GetAllSystemData();
+    }
+}

@@ -28,7 +28,7 @@ namespace WindPowerWebApp.Service
 
         public List<DataModel> GetAllSystemData()
         {
-            return GetSqlSugarClient().Queryable<DataModel>().ToList();
+            return GetSqlSugarClient().Queryable<DataModel>().OrderBy(d => d.DateTime).ToList();
         }
 
         public DataModel GetLatestSystemData()

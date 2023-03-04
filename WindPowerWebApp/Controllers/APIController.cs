@@ -10,12 +10,12 @@ namespace WindPowerWebApp.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SystemDataController : ControllerBase
+    public class APIController : ControllerBase
     {
         private readonly SqlDbService _sqlDbService;
         public IPAddress ClientIPAddr;
 
-        public SystemDataController(SqlDbService sqlDbService)
+        public APIController(SqlDbService sqlDbService)
         {
             _sqlDbService = sqlDbService;
         }

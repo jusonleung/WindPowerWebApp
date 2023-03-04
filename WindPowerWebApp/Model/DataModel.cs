@@ -27,6 +27,5 @@ namespace WindPowerWebApp.Model
         {
             return num == null ? "==" : num.Value.ToString("n3") + unit;
         }
-
     }
 }
