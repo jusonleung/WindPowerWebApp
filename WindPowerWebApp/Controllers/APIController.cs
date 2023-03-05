@@ -33,7 +33,6 @@ namespace WindPowerWebApp.Controllers
         {
             try
             {
-                Data.LastestData.lastestData = data;
                 _sqlDbService.AddSystemData(data);
                 return Ok();
             }

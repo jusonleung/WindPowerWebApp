@@ -4,13 +4,337 @@
 
 <PageTitle>AnalysisChart</PageTitle>
 
-<Chart WindTurbineData="@WindTurbineData"></Chart>
+<h4>Against Time</h4>
+<Tabs>
+    <TabPane Key="1">
+        <TabTemplate>Voltage</TabTemplate>
+        <ChildContent>
+            <AntDesign.Charts.Line Data="SmoothedDataForTimeChart" Config="VoltageTimeConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="2">
+        <TabTemplate>Current</TabTemplate>
+        <ChildContent>
+            <AntDesign.Charts.Line Data="SmoothedDataForTimeChart" Config="CurrentTimeConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="3">
+        <TabTemplate>Power</TabTemplate>
+        <ChildContent>
+            <AntDesign.Charts.Line Data="SmoothedDataForTimeChart" Config="PowerTimeConfig" />
+        </ChildContent>
+    </TabPane>
+</Tabs>
+
+<br />
+<br />
+
+<h4>Against RPM</h4>
+<Tabs>
+    <TabPane Key="1">
+        <TabTemplate>Power</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="PowerRPMConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="2">
+        <TabTemplate>Voltage</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="VoltageRPMConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="3">
+        <TabTemplate>Current</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="CurrentRPMConfig" />
+        </ChildContent>
+    </TabPane>
+</Tabs>
+
+<br />
+<br />
+
+<h4>Against Wind Speed</h4>
+<Tabs>
+    <TabPane Key="1">
+        <TabTemplate>Power</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="PowerWindSpeedConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="2">
+        <TabTemplate>Voltage</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="VoltageWindSpeedConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="3">
+        <TabTemplate>Current</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="CurrentWindSpeedConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="4">
+        <TabTemplate>RPM</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="RpmWindSpeedConfig" />
+        </ChildContent>
+    </TabPane>
+</Tabs>
+
+<br />
+<br />
 
 @code {
-    List<DataModel> WindTurbineData;
+    List<DataModelForChart> WindTurbineData;
+    List<DataModelForChart> SmoothedDataForTimeChart;
+
+    const int interval = 30;
 
     protected override void OnInitialized()
     {
-        WindTurbineData = sqlDbService.GetAllSystemData();
+        List<DataModel> RawData = sqlDbService.GetAllSystemData();
+        WindTurbineData = RawData.Select(d => new DataModelForChart(d)).ToList();
+        SmoothedDataForTimeChart = SmoothDataList(RawData, interval).Select(d => new DataModelForChart(d)).ToList();
     }
+
+    List<DataModel> SmoothDataList(List<DataModel> dataList, int intervalSeconds)
+    {
+        dataList = dataList
+            .GroupBy(d => new DateTime(d.DateTime.Year, d.DateTime.Month, d.DateTime.Day, d.DateTime.Hour, d.DateTime.Minute, d.DateTime.Second / 30 * 30))
+            .Select(g => new DataModel()
+                {
+                    DateTime = g.Key,
+                    Voltage = g.Average(d => d.Voltage),
+                    Current = g.Average(d => d.Current),
+                    RPM = g.Average(d => d.RPM),
+                    WindSpeed = g.Average(d => d.WindSpeed)
+                })
+            .ToList();
+
+        TimeSpan interval = TimeSpan.FromSeconds(intervalSeconds);
+        var result = new List<DataModel>();
+
+        if (dataList == null || dataList.Count == 0)
+        {
+            return result;
+        }
+
+        // Sort the input list by date/time
+        dataList.Sort((a, b) => a.DateTime.CompareTo(b.DateTime));
+
+        // Determine the start and end times for the data
+        DateTime startTime = dataList[0].DateTime;
+        DateTime endTime = dataList[dataList.Count - 1].DateTime;
+
+        // Iterate over the time range in intervals, filling in missing data as necessary
+        DateTime currentTime = startTime;
+        while (currentTime <= endTime)
+        {
+            // Find the first data point that is equal to or greater than the current time
+            int index = dataList.FindIndex(x => x.DateTime >= currentTime);
+
+            // If there is a data point at this time, add it to the result list
+            if (index >= 0 && index < dataList.Count && dataList[index].DateTime == currentTime)
+            {
+                result.Add(dataList[index]);
+            }
+            // If there is no data point at this time, interpolate a value between the nearest data points
+            else
+            {
+                int indexBefore = dataList.FindLastIndex(x => x.DateTime < currentTime);
+                int indexAfter = dataList.FindIndex(indexBefore + 1, x => x.DateTime > currentTime);
+
+                if (indexBefore >= 0 && indexBefore < dataList.Count && indexAfter >= 0 && indexAfter < dataList.Count)
+                {
+                    // Interpolate a value between the nearest data points
+                    float fraction = (float)(currentTime - dataList[indexBefore].DateTime).TotalSeconds / (float)(dataList[indexAfter].DateTime - dataList[indexBefore].DateTime).TotalSeconds;
+                    float voltage = dataList[indexBefore].Voltage.Value + fraction * (dataList[indexAfter].Voltage.Value - dataList[indexBefore].Voltage.Value);
+                    float current = dataList[indexBefore].Current.Value + fraction * (dataList[indexAfter].Current.Value - dataList[indexBefore].Current.Value);
+                    float rpm = dataList[indexBefore].RPM.Value + fraction * (dataList[indexAfter].RPM.Value - dataList[indexBefore].RPM.Value);
+                    float windSpeed = dataList[indexBefore].WindSpeed.Value + fraction * (dataList[indexAfter].WindSpeed.Value - dataList[indexBefore].WindSpeed.Value);
+
+                    result.Add(new DataModel { DateTime = currentTime, Voltage = voltage, Current = current, RPM = rpm, WindSpeed = windSpeed });
+                }
+                else if (indexBefore >= 0 && indexBefore < dataList.Count)
+                {
+                    // Use the nearest data point as a fill-in value
+                    result.Add(dataList[indexBefore]);
+                }
+                else if (indexAfter >= 0 && indexAfter < dataList.Count)
+                {
+                    // Use the nearest data point as a fill-in value
+                    result.Add(dataList[indexAfter]);
+                }
+            }
+
+            // Advance to the next interval
+            currentTime = currentTime.Add(interval);
+        }
+
+        return result;
+    }
+
+    #region Voltage vs Time
+
+    LineConfig VoltageTimeConfig = new LineConfig
+        {
+            Padding = "auto",
+            AutoFit = true,
+            XField = "dateTimeStr",
+            YField = "voltage",
+        };
+
+    #endregion Voltage vs Time
+
+    #region Current vs Time
+    LineConfig CurrentTimeConfig = new LineConfig
+        {
+            AutoFit = true,
+            Padding = "auto",
+            XField = "dateTimeStr",
+            YField = "current",
+        };
+
+    #endregion Current vs Time
+
+    #region Power vs Time
+    LineConfig PowerTimeConfig = new LineConfig
+        {
+            Padding = "auto",
+            AutoFit = true,
+            XField = "dateTimeStr",
+            YField = "power"
+        };
+
+    #endregion Power vs Time
+
+    #region Power vs RPM
+
+    readonly ScatterConfig PowerRPMConfig = new ScatterConfig
+        {
+            XField = "rpm",
+            YField = "power",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            },
+            //RegressionLine = new RegressionLineConfig
+            //{
+            //    Type = "linear"
+            //}
+        };
+
+    #endregion Power vs RPM
+
+    #region Voltage vs RPM
+
+    readonly ScatterConfig VoltageRPMConfig = new ScatterConfig
+        {
+            XField = "rpm",
+            YField = "voltage",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            },
+            //RegressionLine = new RegressionLineConfig
+            //{
+            //    Type = "linear"
+            //}
+        };
+
+    #endregion Voltage vs RPM
+
+    #region Current vs RPM
+
+    readonly ScatterConfig CurrentRPMConfig = new ScatterConfig
+        {
+            XField = "rpm",
+            YField = "current",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    #endregion Current vs RPM
+
+    #region Power vs WindSpeed
+
+    readonly ScatterConfig PowerWindSpeedConfig = new ScatterConfig
+        {
+            XField = "windSpeed",
+            YField = "power",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    #endregion Power vs WindSpeed
+
+    #region Voltage vs WindSpeed
+
+    readonly ScatterConfig VoltageWindSpeedConfig = new ScatterConfig
+        {
+            XField = "windSpeed",
+            YField = "voltage",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    #endregion Voltage vs WindSpeed
+
+
+    #region Current vs WindSpeed
+
+    readonly ScatterConfig CurrentWindSpeedConfig = new ScatterConfig
+        {
+            XField = "windSpeed",
+            YField = "current",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    #endregion Current vs WindSpeed
+
+
+    #region RPM vs WindSpeed
+
+    readonly ScatterConfig RpmWindSpeedConfig = new ScatterConfig
+        {
+            XField = "windSpeed",
+            YField = "rpm",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    #endregion RPM vs WindSpeed
 }
