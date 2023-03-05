@@ -6,7 +6,7 @@
 
 <RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' OnChange="OnTimeRangeChange" AllowClear=true
              DisabledDate="date => date < SmoothedDataForTimeChart.First().DateTime.AddDays(-1) || date > SmoothedDataForTimeChart.Last().DateTime" />
-<Tabs>
+<Tabs >
     <TabPane Key="1">
         <TabTemplate>Voltage</TabTemplate>
         <ChildContent>
@@ -31,7 +31,7 @@
     List<DataModelForChart> SmoothedDataForTimeChart;
     List<DataModelForChart> RangedSmoothedDataForTimeChart;
 
-    const int interval = 30;
+    const int interval = 15;
 
     protected override void OnInitialized()
     {
@@ -40,10 +40,14 @@
         RangedSmoothedDataForTimeChart = SmoothedDataForTimeChart.ToList();
     }
 
-    private void OnTimeRangeChange(DateRangeChangedEventArgs args)
+    private async void OnTimeRangeChange(DateRangeChangedEventArgs args)
     {
         RangedSmoothedDataForTimeChart = SmoothedDataForTimeChart.ToList();
         RangedSmoothedDataForTimeChart.RemoveAll(data => data.DateTime < args.Dates.FirstOrDefault() || data.DateTime > args.Dates.LastOrDefault());
+        await InvokeAsync(async () =>
+        {
+            StateHasChanged();
+        });
     }
 
     List<DataModel> SmoothDataList(List<DataModel> dataList, int intervalSeconds)

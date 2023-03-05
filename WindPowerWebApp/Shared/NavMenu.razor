@@ -1,93 +1,34 @@
-﻿@*<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Wind Power System</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
-
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu" >
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="SystemData">
-                <span class="oi oi-list" aria-hidden="true"></span> SystemData
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="SystemControl">
-                <span class="oi oi-cog" aria-hidden="true"></span> SystemControl
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="AnalysisChart">
-                <span class="oi oi-cog" aria-hidden="true"></span> AnalysisChart
-            </NavLink>
-        </div>
-
-    </nav>
-</div>
-
-@code {
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
-}*@
-
-@inject NavigationManager NavManager
+﻿@inject NavigationManager NavManager
 @inject Blazored.LocalStorage.ILocalStorageService localStorageService
 
-<Sider Collapsible Collapsed=@collapsed OnCollapse=@onCollapse>
-    <div class="logo" />
-    <Menu Theme="MenuTheme.Dark" DefaultSelectedKeys=@(new[]{"1"}) Mode="MenuMode.Inline">
-        <MenuItem Key="1" RouterLink="" Icon="home">
-            Wind Power System
-        </MenuItem>
-        <MenuItem Key="2" RouterLink="system-data" Icon="unordered-list">
-            System Data
-        </MenuItem>
-        <MenuItem Key="3" RouterLink="system-control" Icon="control">
-            System Control
-        </MenuItem>
-        
-        <SubMenu Key="sub1" TitleTemplate=@chart>
-			<MenuItem Key="4" Icon="line-chart" RouterLink="chart/time">Time</MenuItem>
-            <MenuItem Key="5" Icon="dot-chart" RouterLink="chart/rpm">RPM</MenuItem>
-            <MenuItem Key="6" Icon="dot-chart" RouterLink="chart/windspeed">Wind Speed</MenuItem>
-		</SubMenu>
+<Menu Theme="MenuTheme.Dark" DefaultSelectedKeys=@(new[]{"1"}) Mode="MenuMode.Horizontal">
+    <MenuItem Key="1" RouterLink="" Icon="home">
+        Wind Power System
+    </MenuItem>
+    <MenuItem Key="2" RouterLink="system-data" Icon="unordered-list">
+        System Data
+    </MenuItem>
+    <MenuItem Key="3" RouterLink="system-control" Icon="control">
+        System Control
+    </MenuItem>
 
-        <MenuItem Key="8" OnClick="@Logout" Icon="logout">
-            Logout
-        </MenuItem>
-    </Menu>
+    <SubMenu Key="sub1" TitleTemplate=@chart>
+        <MenuItem Key="4" Icon="line-chart" RouterLink="chart/time">Time</MenuItem>
+        <MenuItem Key="5" Icon="dot-chart" RouterLink="chart/rpm">RPM</MenuItem>
+        <MenuItem Key="6" Icon="dot-chart" RouterLink="chart/windspeed">Wind Speed</MenuItem>
+    </SubMenu>
 
-    
-</Sider>
+    <MenuItem Style="float:right" Key="7" OnClick="@Logout" Icon="logout">
+        Logout
+    </MenuItem>
+</Menu>
 
 @code {
-    bool collapsed;
-
     RenderFragment chart =
     @<span>
         <Icon Type="line-chart" Theme="outline" />
-        <span>Chart Analysis</span>
+        <span>Chart</span>
     </span>;
-
-    void onCollapse(bool collapsed)
-    {
-        Console.WriteLine(collapsed);
-        this.collapsed = collapsed;
-    }
 
     private void Logout()
     {

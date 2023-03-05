@@ -15,7 +15,7 @@ namespace WindPowerWebApp.Model
         public DataModelForChart(DataModel data)
         {
             this.DateTime = data.DateTime;
-            this.DateTimeStr = this.DateTime.ToString("yyyy-MM-dd HH:mm:ss");
+            this.DateTimeStr = this.DateTime.ToString("M/d HH:mm:ss");
             this.Current = data.Current;
             this.Voltage = data.Voltage;
             this.RPM = data.RPM;

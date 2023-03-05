@@ -6,29 +6,15 @@
 <div class="page">
     <AuthorizeView>
         <Authorized>
-            <Layout Style="min-height: 100vh; ">
-                <NavMenu />
-
-                @*<main>
-                <div class="top-row px-4">
-                <a onclick="@Logout">Logout</a>
-                </div>
-
-                <article class="content px-4">
-                @Body
-                </article>
-                </main>*@
-
-                <Layout Class="site-layout" Style="background-color:white">
-                    @*<Header Class="site-layout-background" Style=" padding: 0 ;">
-                        <div style="float:right">
-                            <Button Type="@ButtonType.Primary" OnClick="@Logout">Logout</Button>
-                        </div>
-                    </Header>*@
+            <Layout>
+                <Header Class="header" Style="position:fixed; width:100vw; z-index: 99;">
+                    <NavMenu />
+                </Header>
+                <Layout Class="site-layout" Style="background-color:white; margin-top:55px">
                     <Content Style="margin:16px;">
                         @Body
                     </Content>
-                    <Footer Style="text-align:center ">Wind Power System ©2023 Created by Juson Leung</Footer>
+                    <Footer Style="text-align:center;font-size:small;height:1vh">Wind Power System ©2023 Created by Juson Leung</Footer>
                 </Layout>
             </Layout>
         </Authorized>
