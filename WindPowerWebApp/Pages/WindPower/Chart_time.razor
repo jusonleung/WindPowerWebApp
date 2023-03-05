@@ -1,101 +1,49 @@
 ﻿@inject SqlDbService sqlDbService
 
-@page "/AnalysisChart"
+@page "/chart/time"
 
-<PageTitle>AnalysisChart</PageTitle>
+<PageTitle>Chart over Time</PageTitle>
 
-<h4>Against Time</h4>
+<RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' OnChange="OnTimeRangeChange" AllowClear=true
+             DisabledDate="date => date < SmoothedDataForTimeChart.First().DateTime.AddDays(-1) || date > SmoothedDataForTimeChart.Last().DateTime" />
 <Tabs>
     <TabPane Key="1">
         <TabTemplate>Voltage</TabTemplate>
         <ChildContent>
-            <AntDesign.Charts.Line Data="SmoothedDataForTimeChart" Config="VoltageTimeConfig" />
+            <Line Data="@RangedSmoothedDataForTimeChart" Config="VoltageTimeConfig" />
         </ChildContent>
     </TabPane>
     <TabPane Key="2">
         <TabTemplate>Current</TabTemplate>
         <ChildContent>
-            <AntDesign.Charts.Line Data="SmoothedDataForTimeChart" Config="CurrentTimeConfig" />
+            <Line Data="@RangedSmoothedDataForTimeChart" Config="CurrentTimeConfig" />
         </ChildContent>
     </TabPane>
     <TabPane Key="3">
         <TabTemplate>Power</TabTemplate>
         <ChildContent>
-            <AntDesign.Charts.Line Data="SmoothedDataForTimeChart" Config="PowerTimeConfig" />
+            <Line Data="@RangedSmoothedDataForTimeChart" Config="PowerTimeConfig" />
         </ChildContent>
     </TabPane>
 </Tabs>
-
-<br />
-<br />
-
-<h4>Against RPM</h4>
-<Tabs>
-    <TabPane Key="1">
-        <TabTemplate>Power</TabTemplate>
-        <ChildContent>
-            <Scatter Data="WindTurbineData" Config="PowerRPMConfig" />
-        </ChildContent>
-    </TabPane>
-    <TabPane Key="2">
-        <TabTemplate>Voltage</TabTemplate>
-        <ChildContent>
-            <Scatter Data="WindTurbineData" Config="VoltageRPMConfig" />
-        </ChildContent>
-    </TabPane>
-    <TabPane Key="3">
-        <TabTemplate>Current</TabTemplate>
-        <ChildContent>
-            <Scatter Data="WindTurbineData" Config="CurrentRPMConfig" />
-        </ChildContent>
-    </TabPane>
-</Tabs>
-
-<br />
-<br />
-
-<h4>Against Wind Speed</h4>
-<Tabs>
-    <TabPane Key="1">
-        <TabTemplate>Power</TabTemplate>
-        <ChildContent>
-            <Scatter Data="WindTurbineData" Config="PowerWindSpeedConfig" />
-        </ChildContent>
-    </TabPane>
-    <TabPane Key="2">
-        <TabTemplate>Voltage</TabTemplate>
-        <ChildContent>
-            <Scatter Data="WindTurbineData" Config="VoltageWindSpeedConfig" />
-        </ChildContent>
-    </TabPane>
-    <TabPane Key="3">
-        <TabTemplate>Current</TabTemplate>
-        <ChildContent>
-            <Scatter Data="WindTurbineData" Config="CurrentWindSpeedConfig" />
-        </ChildContent>
-    </TabPane>
-    <TabPane Key="4">
-        <TabTemplate>RPM</TabTemplate>
-        <ChildContent>
-            <Scatter Data="WindTurbineData" Config="RpmWindSpeedConfig" />
-        </ChildContent>
-    </TabPane>
-</Tabs>
-
-<br />
-<br />
 
 @code {
-    List<DataModelForChart> WindTurbineData;
     List<DataModelForChart> SmoothedDataForTimeChart;
+    List<DataModelForChart> RangedSmoothedDataForTimeChart;
 
     const int interval = 30;
 
     protected override void OnInitialized()
     {
         List<DataModel> RawData = sqlDbService.GetAllSystemData();
-        WindTurbineData = RawData.Select(d => new DataModelForChart(d)).ToList();
         SmoothedDataForTimeChart = SmoothDataList(RawData, interval).Select(d => new DataModelForChart(d)).ToList();
+        RangedSmoothedDataForTimeChart = SmoothedDataForTimeChart.ToList();
+    }
+
+    private void OnTimeRangeChange(DateRangeChangedEventArgs args)
+    {
+        RangedSmoothedDataForTimeChart = SmoothedDataForTimeChart.ToList();
+        RangedSmoothedDataForTimeChart.RemoveAll(data => data.DateTime < args.Dates.FirstOrDefault() || data.DateTime > args.Dates.LastOrDefault());
     }
 
     List<DataModel> SmoothDataList(List<DataModel> dataList, int intervalSeconds)
@@ -208,133 +156,4 @@
         };
 
     #endregion Power vs Time
-
-    #region Power vs RPM
-
-    readonly ScatterConfig PowerRPMConfig = new ScatterConfig
-        {
-            XField = "rpm",
-            YField = "power",
-            AutoFit = true,
-            PointStyle = new GraphicStyle
-            {
-                Stroke = "#777777",
-                LineWidth = 1,
-                Fill = "#5B8FF9",
-            },
-            //RegressionLine = new RegressionLineConfig
-            //{
-            //    Type = "linear"
-            //}
-        };
-
-    #endregion Power vs RPM
-
-    #region Voltage vs RPM
-
-    readonly ScatterConfig VoltageRPMConfig = new ScatterConfig
-        {
-            XField = "rpm",
-            YField = "voltage",
-            AutoFit = true,
-            PointStyle = new GraphicStyle
-            {
-                Stroke = "#777777",
-                LineWidth = 1,
-                Fill = "#5B8FF9",
-            },
-            //RegressionLine = new RegressionLineConfig
-            //{
-            //    Type = "linear"
-            //}
-        };
-
-    #endregion Voltage vs RPM
-
-    #region Current vs RPM
-
-    readonly ScatterConfig CurrentRPMConfig = new ScatterConfig
-        {
-            XField = "rpm",
-            YField = "current",
-            AutoFit = true,
-            PointStyle = new GraphicStyle
-            {
-                Stroke = "#777777",
-                LineWidth = 1,
-                Fill = "#5B8FF9",
-            }
-        };
-
-    #endregion Current vs RPM
-
-    #region Power vs WindSpeed
-
-    readonly ScatterConfig PowerWindSpeedConfig = new ScatterConfig
-        {
-            XField = "windSpeed",
-            YField = "power",
-            AutoFit = true,
-            PointStyle = new GraphicStyle
-            {
-                Stroke = "#777777",
-                LineWidth = 1,
-                Fill = "#5B8FF9",
-            }
-        };
-
-    #endregion Power vs WindSpeed
-
-    #region Voltage vs WindSpeed
-
-    readonly ScatterConfig VoltageWindSpeedConfig = new ScatterConfig
-        {
-            XField = "windSpeed",
-            YField = "voltage",
-            AutoFit = true,
-            PointStyle = new GraphicStyle
-            {
-                Stroke = "#777777",
-                LineWidth = 1,
-                Fill = "#5B8FF9",
-            }
-        };
-
-    #endregion Voltage vs WindSpeed
-
-
-    #region Current vs WindSpeed
-
-    readonly ScatterConfig CurrentWindSpeedConfig = new ScatterConfig
-        {
-            XField = "windSpeed",
-            YField = "current",
-            AutoFit = true,
-            PointStyle = new GraphicStyle
-            {
-                Stroke = "#777777",
-                LineWidth = 1,
-                Fill = "#5B8FF9",
-            }
-        };
-
-    #endregion Current vs WindSpeed
-
-
-    #region RPM vs WindSpeed
-
-    readonly ScatterConfig RpmWindSpeedConfig = new ScatterConfig
-        {
-            XField = "windSpeed",
-            YField = "rpm",
-            AutoFit = true,
-            PointStyle = new GraphicStyle
-            {
-                Stroke = "#777777",
-                LineWidth = 1,
-                Fill = "#5B8FF9",
-            }
-        };
-
-    #endregion RPM vs WindSpeed
 }

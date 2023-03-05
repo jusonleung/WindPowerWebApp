@@ -6,19 +6,31 @@
 <div class="page">
     <AuthorizeView>
         <Authorized>
-            <div class="sidebar">
+            <Layout Style="min-height: 100vh; ">
                 <NavMenu />
-            </div>
 
-            <main>
+                @*<main>
                 <div class="top-row px-4">
-                    <a onclick="@Logout">Logout</a>
+                <a onclick="@Logout">Logout</a>
                 </div>
 
                 <article class="content px-4">
-                    @Body
+                @Body
                 </article>
-            </main>
+                </main>*@
+
+                <Layout Class="site-layout" Style="background-color:white">
+                    @*<Header Class="site-layout-background" Style=" padding: 0 ;">
+                        <div style="float:right">
+                            <Button Type="@ButtonType.Primary" OnClick="@Logout">Logout</Button>
+                        </div>
+                    </Header>*@
+                    <Content Style="margin:16px;">
+                        @Body
+                    </Content>
+                    <Footer Style="text-align:center ">Wind Power System ©2023 Created by Juson Leung</Footer>
+                </Layout>
+            </Layout>
         </Authorized>
         <NotAuthorized>
             <div style="position: fixed;
@@ -33,7 +45,7 @@
     </AuthorizeView>
 </div>
 
-@code{
+@code {
     private void Logout()
     {
         localStorageService.ClearAsync();

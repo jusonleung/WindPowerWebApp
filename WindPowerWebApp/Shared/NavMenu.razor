@@ -1,4 +1,4 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@*<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Wind Power System</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -7,7 +7,7 @@
     </div>
 </div>
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu" >
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
@@ -41,5 +41,57 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+}*@
+
+@inject NavigationManager NavManager
+@inject Blazored.LocalStorage.ILocalStorageService localStorageService
+
+<Sider Collapsible Collapsed=@collapsed OnCollapse=@onCollapse>
+    <div class="logo" />
+    <Menu Theme="MenuTheme.Dark" DefaultSelectedKeys=@(new[]{"1"}) Mode="MenuMode.Inline">
+        <MenuItem Key="1" RouterLink="" Icon="home">
+            Wind Power System
+        </MenuItem>
+        <MenuItem Key="2" RouterLink="system-data" Icon="unordered-list">
+            System Data
+        </MenuItem>
+        <MenuItem Key="3" RouterLink="system-control" Icon="control">
+            System Control
+        </MenuItem>
+        
+        <SubMenu Key="sub1" TitleTemplate=@chart>
+			<MenuItem Key="4" Icon="line-chart" RouterLink="chart/time">Time</MenuItem>
+            <MenuItem Key="5" Icon="dot-chart" RouterLink="chart/rpm">RPM</MenuItem>
+            <MenuItem Key="6" Icon="dot-chart" RouterLink="chart/windspeed">Wind Speed</MenuItem>
+		</SubMenu>
+
+        <MenuItem Key="8" OnClick="@Logout" Icon="logout">
+            Logout
+        </MenuItem>
+    </Menu>
+
+    
+</Sider>
+
+@code {
+    bool collapsed;
+
+    RenderFragment chart =
+    @<span>
+        <Icon Type="line-chart" Theme="outline" />
+        <span>Chart Analysis</span>
+    </span>;
+
+    void onCollapse(bool collapsed)
+    {
+        Console.WriteLine(collapsed);
+        this.collapsed = collapsed;
+    }
+
+    private void Logout()
+    {
+        localStorageService.ClearAsync();
+        NavManager.NavigateTo("", forceLoad: true);
     }
 }

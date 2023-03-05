@@ -1,0 +1,95 @@
+﻿@inject SqlDbService sqlDbService
+
+@page "/chart/rpm"
+
+<PageTitle>Chart over RPM</PageTitle>
+
+<Tabs>
+    <TabPane Key="1">
+        <TabTemplate>Power</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="PowerRPMConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="2">
+        <TabTemplate>Voltage</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="VoltageRPMConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="3">
+        <TabTemplate>Current</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="CurrentRPMConfig" />
+        </ChildContent>
+    </TabPane>
+</Tabs>
+
+@code {
+    List<DataModelForChart> WindTurbineData;
+
+    protected override void OnInitialized()
+    {
+        List<DataModel> RawData = sqlDbService.GetAllSystemData();
+        WindTurbineData = RawData.Select(d => new DataModelForChart(d)).ToList();
+    }
+
+    #region Power vs RPM
+
+    readonly ScatterConfig PowerRPMConfig = new ScatterConfig
+        {
+            XField = "rpm",
+            YField = "power",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            },
+            //RegressionLine = new RegressionLineConfig
+            //{
+            //    Type = "linear"
+            //}
+        };
+
+    #endregion Power vs RPM
+
+    #region Voltage vs RPM
+
+    readonly ScatterConfig VoltageRPMConfig = new ScatterConfig
+        {
+            XField = "rpm",
+            YField = "voltage",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            },
+            //RegressionLine = new RegressionLineConfig
+            //{
+            //    Type = "linear"
+            //}
+        };
+
+    #endregion Voltage vs RPM
+
+    #region Current vs RPM
+
+    readonly ScatterConfig CurrentRPMConfig = new ScatterConfig
+        {
+            XField = "rpm",
+            YField = "current",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    #endregion Current vs RPM
+}

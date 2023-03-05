@@ -2,7 +2,7 @@
 
 namespace WindPowerWebApp.Model
 {
-    public class DataModelForChart : DataModel
+    public class DataModelForChart
     {
         public float? Power { get; set; }
         public float? Voltage { get; set; }

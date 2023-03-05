@@ -1,0 +1,110 @@
+﻿@inject SqlDbService sqlDbService
+
+@page "/chart/windspeed"
+
+<PageTitle>Chart over Wind Speed</PageTitle>
+
+<Tabs>
+    <TabPane Key="1">
+        <TabTemplate>Power</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="PowerWindSpeedConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="2">
+        <TabTemplate>Voltage</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="VoltageWindSpeedConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="3">
+        <TabTemplate>Current</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="CurrentWindSpeedConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="4">
+        <TabTemplate>RPM</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="RpmWindSpeedConfig" />
+        </ChildContent>
+    </TabPane>
+</Tabs>
+
+@code {
+    List<DataModelForChart> WindTurbineData;
+
+    protected override void OnInitialized()
+    {
+        List<DataModel> RawData = sqlDbService.GetAllSystemData();
+        WindTurbineData = RawData.Select(d => new DataModelForChart(d)).ToList();
+    }
+
+    #region Power vs WindSpeed
+
+    readonly ScatterConfig PowerWindSpeedConfig = new ScatterConfig
+        {
+            XField = "windSpeed",
+            YField = "power",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    #endregion Power vs WindSpeed
+
+    #region Voltage vs WindSpeed
+
+    readonly ScatterConfig VoltageWindSpeedConfig = new ScatterConfig
+        {
+            XField = "windSpeed",
+            YField = "voltage",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    #endregion Voltage vs WindSpeed
+
+    #region Current vs WindSpeed
+
+    readonly ScatterConfig CurrentWindSpeedConfig = new ScatterConfig
+        {
+            XField = "windSpeed",
+            YField = "current",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    #endregion Current vs WindSpeed
+
+    #region RPM vs WindSpeed
+
+    readonly ScatterConfig RpmWindSpeedConfig = new ScatterConfig
+        {
+            XField = "windSpeed",
+            YField = "rpm",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    #endregion RPM vs WindSpeed
+}
