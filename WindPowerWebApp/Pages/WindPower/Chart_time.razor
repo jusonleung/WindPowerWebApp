@@ -1,28 +1,33 @@
 ﻿@inject SqlDbService sqlDbService
+@inject NavigationManager NavManager
 
 @page "/chart/time"
+@using Microsoft.AspNetCore.WebUtilities;
 
 <PageTitle>Chart over Time</PageTitle>
 
-<RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' OnChange="OnTimeRangeChange" AllowClear=true
-             DisabledDate="date => date < SmoothedDataForTimeChart.First().DateTime.AddDays(-1) || date > SmoothedDataForTimeChart.Last().DateTime" />
+<RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true
+    DisabledDate="date => date < SmoothedDataForTimeChart.First().DateTime.AddDays(-1) || date > SmoothedDataForTimeChart.Last().DateTime" />
+
+@*<Button Type="@ButtonType.Primary" OnClick="OnClick">Submit</Button>*@
+
 <Tabs >
     <TabPane Key="1">
         <TabTemplate>Voltage</TabTemplate>
         <ChildContent>
-            <Line Data="@RangedSmoothedDataForTimeChart" Config="VoltageTimeConfig" />
+            <Line Data="RangedSmoothedDataForTimeChart" Config="VoltageTimeConfig" />
         </ChildContent>
     </TabPane>
     <TabPane Key="2">
         <TabTemplate>Current</TabTemplate>
         <ChildContent>
-            <Line Data="@RangedSmoothedDataForTimeChart" Config="CurrentTimeConfig" />
+            <Line Data="RangedSmoothedDataForTimeChart" Config="CurrentTimeConfig" />
         </ChildContent>
     </TabPane>
     <TabPane Key="3">
         <TabTemplate>Power</TabTemplate>
         <ChildContent>
-            <Line Data="@RangedSmoothedDataForTimeChart" Config="PowerTimeConfig" />
+            <Line Data="RangedSmoothedDataForTimeChart" Config="PowerTimeConfig" />
         </ChildContent>
     </TabPane>
 </Tabs>
@@ -31,23 +36,13 @@
     List<DataModelForChart> SmoothedDataForTimeChart;
     List<DataModelForChart> RangedSmoothedDataForTimeChart;
 
-    const int interval = 15;
+    int interval = 30;
 
     protected override void OnInitialized()
     {
         List<DataModel> RawData = sqlDbService.GetAllSystemData();
         SmoothedDataForTimeChart = SmoothDataList(RawData, interval).Select(d => new DataModelForChart(d)).ToList();
         RangedSmoothedDataForTimeChart = SmoothedDataForTimeChart.ToList();
-    }
-
-    private async void OnTimeRangeChange(DateRangeChangedEventArgs args)
-    {
-        RangedSmoothedDataForTimeChart = SmoothedDataForTimeChart.ToList();
-        RangedSmoothedDataForTimeChart.RemoveAll(data => data.DateTime < args.Dates.FirstOrDefault() || data.DateTime > args.Dates.LastOrDefault());
-        await InvokeAsync(async () =>
-        {
-            StateHasChanged();
-        });
     }
 
     List<DataModel> SmoothDataList(List<DataModel> dataList, int intervalSeconds)

@@ -6,7 +6,8 @@ namespace WindPowerWebApp.Model
     [SugarTable("SystemData")]
     public class DataModel
     {
-
+        public float? Latitude { get; set; }
+        public float? Longitude { get; set; }
         [DisplayName("Voltage (W)")]
         public float? Voltage { get; set; }
         [DisplayName("Current (A)")]
@@ -18,10 +19,6 @@ namespace WindPowerWebApp.Model
 
         [DisplayName("Date time")]
         public DateTime DateTime { get; set; }
-
-        public float? Latitude { get; set; }
-
-        public float? Longitude { get; set; }
 
         public string NullorAddUnit(float? num, string unit)
         {

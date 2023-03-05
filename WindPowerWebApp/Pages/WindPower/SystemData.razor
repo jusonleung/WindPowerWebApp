@@ -6,9 +6,15 @@
 
 
 <button class="btn btn-primary" @onclick="@CreateExcel">Download</button>
+
+<RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true @bind-Value="@RangePicker"
+             @*DisabledDate="date => date < Data.First().DateTime.AddDays(-1) || date > Data.Last().DateTime" *@/>
+
+<Button Type="@ButtonType.Primary" OnClick="OnClickSubmit">Submit</Button>
+<br />
 <br />
 <Table TItem="DataModel"
-       DataSource="@data"
+       DataSource="@Data"
        Total="_total"
        @bind-PageIndex="_pageIndex"
        @bind-PageSize="_pageSize">
@@ -31,18 +37,22 @@
 </Table>
 
 @code {
-    List<DataModel> data;
+    List<DataModel> Data;
 
-    ITable table;
+    ITable Table;
 
     int _pageIndex = 1;
     int _pageSize = 20;
     int _total = 0;
 
+    DateTime?[] RangePicker = new DateTime?[2];
+
     protected override void OnInitialized()
     {
-        data = sqlDbService.GetAllSystemData();
-        _total = data.Count;
+        Data = sqlDbService.GetAllSystemData();
+        RangePicker[0] = Data.FirstOrDefault().DateTime;
+        RangePicker[1] = Data.LastOrDefault().DateTime;
+        _total = Data.Count;
     }
 
     MemoryStream excelStream;
@@ -52,7 +62,15 @@
     /// </summary>
     protected async void CreateExcel()
     {
-        excelStream = excelService.CreateExcel(data);
+        excelStream = excelService.CreateExcel(Data);
         await JS.SaveAs("SystemData.xlsx", excelStream.ToArray());
+    }
+
+    void OnClickSubmit()
+    {
+        DateTime endTime = RangePicker.LastOrDefault() ?? DateTime.Now; // if RangePicker.Last is null, use DateTime.Now as end time
+        DateTime startTime = RangePicker.FirstOrDefault().GetValueOrDefault(); // use the first value as start time
+        Data = sqlDbService.GetAllSystemData(startTime, endTime);
+        _total = Data.Count;
     }
 }

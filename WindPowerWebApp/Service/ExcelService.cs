@@ -78,36 +78,6 @@ namespace WindPowerWebApp.Service
                     ws.Cell(2 + numberOfRecords, totalOfFields - numberOfFields + 1).Style.Border.LeftBorder = XLBorderStyleValues.Thin;
                     ws.Cell(2 + numberOfRecords, totalOfFields - numberOfFields + 1).Style.Border.RightBorder = XLBorderStyleValues.Thin;
                     ws.Cell(2 + numberOfRecords, totalOfFields - numberOfFields + 1).Style.Border.TopBorder = XLBorderStyleValues.Thin;
-
-                    /*string propValueStr;
-                    if (propValue == null)
-                        propValueStr = "";
-                    else
-                        propValueStr = propValue.ToString();
-
-                    if (numberOfFields == 1 && numberOfRecords == 0)
-                    {
-                        previousValue = propValueStr;
-                    }
-                    else
-                    {
-                        if (numberOfFields == 1)
-                        {
-                            if (previousValue == propValueStr)
-                            {
-                                ws.Range(ws.Cell(6 + numberOfRecords - (1 + indexOfPreviousValue), totalOfFields - numberOfFields + 4), ws.Cell(6 + numberOfRecords, totalOfFields - numberOfFields + 4)).Merge().Value = propValueStr;
-
-                                ws.Range(ws.Cell(6 + numberOfRecords - (1 + indexOfPreviousValue), totalOfFields - numberOfFields + 4), ws.Cell(6 + numberOfRecords, totalOfFields - numberOfFields + 4)).Merge().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                                ws.Range(ws.Cell(6 + numberOfRecords - (1 + indexOfPreviousValue), totalOfFields - numberOfFields + 4), ws.Cell(6 + numberOfRecords, totalOfFields - numberOfFields + 4)).Merge().Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                                indexOfPreviousValue++;
-                            }
-                            else
-                            {
-                                previousValue = propValueStr;
-                                indexOfPreviousValue = 0;
-                            }
-                        }
-                    }*/
                 }
                 numberOfRecords++;
             }

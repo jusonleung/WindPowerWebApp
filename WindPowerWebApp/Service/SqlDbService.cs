@@ -31,6 +31,15 @@ namespace WindPowerWebApp.Service
             return GetSqlSugarClient().Queryable<DataModel>().OrderBy(d => d.DateTime).ToList();
         }
 
+        public List<DataModel> GetAllSystemData(DateTime startTime, DateTime endTime)
+        {
+            return GetSqlSugarClient().Queryable<DataModel>()
+                .Where(d => d.DateTime >= startTime && d.DateTime <= endTime)
+                .OrderBy(d => d.DateTime)
+                .ToList();
+        }
+
+
         public DataModel GetLatestSystemData()
         {
             return GetSqlSugarClient().Queryable<DataModel>().OrderBy(d => d.DateTime, OrderByType.Desc).First();
