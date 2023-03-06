@@ -1,23 +1,32 @@
 ﻿@inject SqlDbService sqlDbService
 @inject NavigationManager NavigationManager
 
-<Descriptions Title="Latest status" Bordered>
+<Descriptions Title="Lastest Status" Bordered Size="small">
     <DescriptionsItem Title="Status" Span="1">
         @if (isOnline)
         {
-            <span style="color:green"><a style="font-size:large">●</a> online</span>
+            <Badge Status="@BadgeStatus.Processing" Text="Running"></Badge>
         }
         else
         {
-            <span style="color:red">● offline</span>
+            <Badge Status="@BadgeStatus.Default" Text="Off"></Badge>
         }
     </DescriptionsItem>
     <DescriptionsItem Title="DateTime" Span="2">@data.DateTime.ToString("yyyy-MM-dd HH:mm:ss")</DescriptionsItem>
+    <DescriptionsItem Title="RPM">@data.NullorAddUnit(data.RPM,"rpm")</DescriptionsItem>
+    <DescriptionsItem Title="Wind Speed">@data.NullorAddUnit(data.WindSpeed,"m/s")</DescriptionsItem>
+</Descriptions>
+<h6 style="margin-top:10px">Generater</h6>
+<Descriptions Bordered Size="small">
     <DescriptionsItem Title="Voltage">@data.NullorAddUnit(data.Voltage_generator,"V")</DescriptionsItem>
     <DescriptionsItem Title="Current">@data.NullorAddUnit(data.Current_generator,"A")</DescriptionsItem>
     <DescriptionsItem Title="Power">@data.NullorAddUnit(data.Voltage_generator*data.Current_generator,"W")</DescriptionsItem>
-    <DescriptionsItem Title="RPM">@data.NullorAddUnit(data.RPM,"rpm")</DescriptionsItem>
-    <DescriptionsItem Title="Wind Speed">@data.NullorAddUnit(data.WindSpeed,"m/s")</DescriptionsItem>
+</Descriptions>
+<h6 style="margin-top:10px">Inverter</h6>
+<Descriptions Bordered Size="small">
+    <DescriptionsItem Title="Voltage">@data.NullorAddUnit(data.Voltage_inverter,"V")</DescriptionsItem>
+    <DescriptionsItem Title="Current">@data.NullorAddUnit(data.Current_inverter,"A")</DescriptionsItem>
+    <DescriptionsItem Title="Power">@data.NullorAddUnit(data.Voltage_inverter*data.Current_inverter,"W")</DescriptionsItem>
 </Descriptions>
 
 @code {
@@ -63,109 +72,11 @@
         _timer?.Dispose();
     }
 
+    readonly GaugeConfig config1 = new GaugeConfig
+        {
+            Width = 400,
+            Height = 400,
+            Percent = 64,
+            Range = new double[] { 0, 25, 50, 75, 100 },
+        };
 }
-
-
-
-@*@inject SqlDbService sqlDbService
-@inject SystemControlService systemControlService
-@inject NavigationManager NavigationManager
-
-<Descriptions Title="Latest status" Bordered>
-    <DescriptionsItem Title="Online">
-        @if (_isOnline)
-        {
-            <span style="color:green"><a style="font-size:large">●</a></span>
-        }
-        else
-        {
-            <span style="color:red"><a style="font-size:large">●</a></span>
-        }
-    </DescriptionsItem>
-    <DescriptionsItem Title="Running">
-        <Switch CheckedChildren="On" UnCheckedChildren="Off" Checked="@_isRunning" Loading="@_isLoading" Disabled="@(!_isOnline)" Control OnClick="SystemOnOff" />
-    </DescriptionsItem>
-    <DescriptionsItem Title="DateTime">@data.DateTime.ToString("yyyy-MM-dd HH:mm:ss")</DescriptionsItem>
-    <DescriptionsItem Title="Voltage">@data.NullorAddUnit(data.Voltage,"V")</DescriptionsItem>
-    <DescriptionsItem Title="Current">@data.NullorAddUnit(data.Current,"A")</DescriptionsItem>
-    <DescriptionsItem Title="Power">@data.NullorAddUnit(data.Voltage*data.Current,"W")</DescriptionsItem>
-    <DescriptionsItem Title="RPM">@data.NullorAddUnit(data.RPM,"rpm")</DescriptionsItem>
-    <DescriptionsItem Title="Wind Speed">@data.NullorAddUnit(data.WindSpeed,"m/s")</DescriptionsItem>
-</Descriptions>
-
-@code {
-
-    bool _isOnline;
-    bool _isRunning;
-    bool _isLoading = false;
-    DataModel data;
-    static System.Timers.Timer _timer;
-    static System.Timers.Timer _pinger;
-
-    protected async override void OnInitialized()
-    {
-        data = sqlDbService.GetLatestSystemData();
-        await PingRpi();
-        _pinger = new System.Timers.Timer(60000);
-        _pinger.Elapsed += PingRpiTimer;
-        _pinger.Enabled = true;
-
-        _timer = new System.Timers.Timer(1000);
-        _timer.Elapsed += RefreshStatus;
-        _timer.Enabled = true;
-    }
-
-    async void PingRpiTimer(Object source, System.Timers.ElapsedEventArgs e)
-    {
-        await PingRpi();
-    }
-
-    async Task PingRpi()
-    {
-        bool? running = await systemControlService.PingAsync();
-        if (running == null)
-        {
-            _isOnline = false;
-            return;
-        }
-        _isOnline = true;
-        _isRunning = running.Value;
-        await InvokeAsync(async () =>
-            {
-                StateHasChanged();
-            });
-    }
-
-    async Task SystemOnOff()
-    {
-        _isRunning = !_isRunning;
-        _isLoading = true;
-        var success = await systemControlService.SystemOnOffAsync(_isRunning);
-        if (!success)
-        {
-            _isRunning = !_isRunning;
-        }
-        _isLoading = false;
-    }
-
-    async void RefreshStatus(Object source, System.Timers.ElapsedEventArgs e)
-    {
-        var _data = sqlDbService.GetLatestSystemData();
-        if (_data != null && _data.DateTime > data.DateTime)
-        {
-            data = _data;
-            await InvokeAsync(async () =>
-            {
-                StateHasChanged();
-            });
-        }
-    }
-
-    void Dispose()
-    {
-        _pinger?.Dispose();
-        _timer?.Dispose();
-    }
-
-}*@
-

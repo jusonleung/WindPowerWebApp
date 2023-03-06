@@ -26,6 +26,12 @@ namespace WindPowerWebApp.Service
             });
         }
 
+        public byte[] GetPasswordHash(string username)
+        {
+            var user = GetSqlSugarClient().Queryable<UserModel>().Where(u => u.Username == username).Single();
+            return user.PasswordHash;
+        }
+
         public List<DataModel> GetAllSystemData()
         {
             return GetSqlSugarClient().Queryable<DataModel>().OrderBy(d => d.DateTime).ToList();

@@ -13,14 +13,13 @@
         <Button Type="@ButtonType.Primary" OnClick="OnClickSubmit">Submit</Button>
     </GridCol>
 </GridRow>
-
-<br />
 <br />
 <Table TItem="DataModel"
        DataSource="@Data"
        Total="_total"
        @bind-PageIndex="_pageIndex"
-       @bind-PageSize="_pageSize">
+       @bind-PageSize="_pageSize"
+       >
     <PropertyColumn Property="c=>c.DateTime" Sortable Format="yyyy-MM-dd HH:mm:ss"/>
     <PropertyColumn Title="Generator Voltage" Property="c=>c.Voltage_generator" Sortable>
         <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString()+'V')</CellRender>

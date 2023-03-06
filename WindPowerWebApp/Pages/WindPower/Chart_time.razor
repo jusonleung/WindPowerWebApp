@@ -7,7 +7,7 @@
 <PageTitle>Chart over Time</PageTitle>
 
 <RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true Value="@RangePicker" DisabledDate="date => date < Data.First().DateTime.AddDays(-1) || date > DateTime.Now" />
-<Text>Interval:</Text>
+<Text style="margin-left:15px">Interval:</Text>
 <AntDesign.InputNumber @bind-Value="interval" Formatter="Format" Min="1"></AntDesign.InputNumber>
 <Button Type="@ButtonType.Primary" OnClick="OnClickSubmit">Submit</Button>
 
