@@ -6,41 +6,47 @@
 
 <PageTitle>Chart over Time</PageTitle>
 
-<GridRow>
-    <GridCol Span="6">
-        <RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true Value="@RangePicker" DisabledDate="date => date < Data.First().DateTime.AddDays(-1) || date > DateTime.Now" />
-    </GridCol>
-    <GridCol Span="6">
-        <Text>Interval:</Text>
-        <AntDesign.InputNumber @bind-Value="interval" Formatter="Format" Min="1"></AntDesign.InputNumber>
-        <Button Type="@ButtonType.Primary" OnClick="OnClickSubmit">Submit</Button>
-    </GridCol>
-        
-</GridRow>
-
-
-
-
-
+<RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true Value="@RangePicker" DisabledDate="date => date < Data.First().DateTime.AddDays(-1) || date > DateTime.Now" />
+<Text>Interval:</Text>
+<AntDesign.InputNumber @bind-Value="interval" Formatter="Format" Min="1"></AntDesign.InputNumber>
+<Button Type="@ButtonType.Primary" OnClick="OnClickSubmit">Submit</Button>
 
 
 <Tabs>
     <TabPane Key="1">
-        <TabTemplate>Voltage</TabTemplate>
+        <TabTemplate>Generator Voltage</TabTemplate>
         <ChildContent>
-            <Line Data="Data" Config="VoltageTimeConfig" @ref="@VoltageChart" />
+            <Line Data="Data" Config="Voltage_generatorTimeConfig" @ref="@Voltage_generatorChart" />
         </ChildContent>
     </TabPane>
     <TabPane Key="2">
-        <TabTemplate>Current</TabTemplate>
+        <TabTemplate>Generator Current</TabTemplate>
         <ChildContent>
-            <Line Data="Data" Config="CurrentTimeConfig" @ref="@CurrentChart" />
+            <Line Data="Data" Config="Current_generatorTimeConfig" @ref="@Current_generatorChart" />
         </ChildContent>
     </TabPane>
     <TabPane Key="3">
-        <TabTemplate>Power</TabTemplate>
+        <TabTemplate>Generator Power</TabTemplate>
         <ChildContent>
-            <Line Data="Data" Config="PowerTimeConfig" @ref="@PowerChart" />
+            <Line Data="Data" Config="Power_generatorTimeConfig" @ref="@Power_generatorChart" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="4">
+        <TabTemplate>Inverter Voltage</TabTemplate>
+        <ChildContent>
+            <Line Data="Data" Config="Voltage_inverterTimeConfig" @ref="@Voltage_inverterChart" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="5">
+        <TabTemplate>Inverter Current</TabTemplate>
+        <ChildContent>
+            <Line Data="Data" Config="Current_inverterTimeConfig" @ref="@Current_inverterChart" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="6">
+        <TabTemplate>Inverter Power</TabTemplate>
+        <ChildContent>
+            <Line Data="Data" Config="Power_inverterTimeConfig" @ref="@Power_inverterChart" />
         </ChildContent>
     </TabPane>
 </Tabs>
@@ -50,9 +56,13 @@
 
     DateTime?[] RangePicker = new DateTime?[2];
 
-    IChartComponent VoltageChart;
-    IChartComponent CurrentChart;
-    IChartComponent PowerChart;
+    IChartComponent Voltage_generatorChart;
+    IChartComponent Current_generatorChart;
+    IChartComponent Power_generatorChart;
+
+    IChartComponent Voltage_inverterChart;
+    IChartComponent Current_inverterChart;
+    IChartComponent Power_inverterChart;
 
     int interval = 30;
 
@@ -73,7 +83,7 @@
         DateTime endTime = RangePicker.LastOrDefault() ?? DateTime.Now; // if RangePicker.Last is null, use DateTime.Now as end time
         DateTime startTime = RangePicker.FirstOrDefault().GetValueOrDefault(); // use the first value as start time
         Data = SmoothDataList(sqlDbService.GetAllSystemData(startTime, endTime), interval).Select(d => new DataModelForChart(d)).ToList();
-        foreach (var chart in new[] { VoltageChart, CurrentChart, PowerChart })
+        foreach (var chart in new[] { Voltage_generatorChart, Current_generatorChart, Power_generatorChart, Voltage_inverterChart, Current_inverterChart, Power_inverterChart })
             if (chart != null)
                 await chart.ChangeData(Data);
     }
@@ -85,8 +95,10 @@
             .Select(g => new DataModel()
                 {
                     DateTime = g.Key,
-                    Voltage = g.Average(d => d.Voltage),
-                    Current = g.Average(d => d.Current),
+                    Voltage_generator = g.Average(d => d.Voltage_generator),
+                    Current_generator = g.Average(d => d.Current_generator),
+                    Voltage_inverter = g.Average(d => d.Voltage_inverter),
+                    Current_inverter = g.Average(d => d.Current_inverter),
                     RPM = g.Average(d => d.RPM),
                     WindSpeed = g.Average(d => d.WindSpeed)
                 })
@@ -129,12 +141,26 @@
                 {
                     // Interpolate a value between the nearest data points
                     float fraction = (float)(currentTime - dataList[indexBefore].DateTime).TotalSeconds / (float)(dataList[indexAfter].DateTime - dataList[indexBefore].DateTime).TotalSeconds;
-                    float voltage = dataList[indexBefore].Voltage.Value + fraction * (dataList[indexAfter].Voltage.Value - dataList[indexBefore].Voltage.Value);
-                    float current = dataList[indexBefore].Current.Value + fraction * (dataList[indexAfter].Current.Value - dataList[indexBefore].Current.Value);
+
+                    float voltage_generator = dataList[indexBefore].Voltage_generator.Value + fraction * (dataList[indexAfter].Voltage_generator.Value - dataList[indexBefore].Voltage_generator.Value);
+                    float current_generator = dataList[indexBefore].Current_generator.Value + fraction * (dataList[indexAfter].Current_generator.Value - dataList[indexBefore].Current_generator.Value);
+
+                    float voltage_inverter = dataList[indexBefore].Voltage_inverter.Value + fraction * (dataList[indexAfter].Voltage_inverter.Value - dataList[indexBefore].Voltage_inverter.Value);
+                    float current_inverter = dataList[indexBefore].Current_inverter.Value + fraction * (dataList[indexAfter].Current_inverter.Value - dataList[indexBefore].Current_inverter.Value);
+
                     float rpm = dataList[indexBefore].RPM.Value + fraction * (dataList[indexAfter].RPM.Value - dataList[indexBefore].RPM.Value);
                     float windSpeed = dataList[indexBefore].WindSpeed.Value + fraction * (dataList[indexAfter].WindSpeed.Value - dataList[indexBefore].WindSpeed.Value);
 
-                    result.Add(new DataModel { DateTime = currentTime, Voltage = voltage, Current = current, RPM = rpm, WindSpeed = windSpeed });
+                    result.Add(new DataModel
+                        {
+                            DateTime = currentTime,
+                            Voltage_generator = voltage_generator,
+                            Current_generator = current_generator,
+                            Voltage_inverter = voltage_inverter,
+                            Current_inverter = current_inverter,
+                            RPM = rpm,
+                            WindSpeed = windSpeed
+                        });
                 }
                 else if (indexBefore >= 0 && indexBefore < dataList.Count)
                 {
@@ -155,37 +181,51 @@
         return result;
     }
 
-    #region Voltage vs Time
-
-    LineConfig VoltageTimeConfig = new LineConfig
+    LineConfig Voltage_generatorTimeConfig = new LineConfig
         {
             Padding = "auto",
             AutoFit = true,
             XField = "dateTimeStr",
-            YField = "voltage",
+            YField = "voltage_generator",
         };
 
-    #endregion Voltage vs Time
-
-    #region Current vs Time
-    LineConfig CurrentTimeConfig = new LineConfig
+    LineConfig Current_generatorTimeConfig = new LineConfig
         {
             AutoFit = true,
             Padding = "auto",
             XField = "dateTimeStr",
-            YField = "current",
+            YField = "current_generator",
         };
 
-    #endregion Current vs Time
-
-    #region Power vs Time
-    LineConfig PowerTimeConfig = new LineConfig
+    LineConfig Power_generatorTimeConfig = new LineConfig
         {
             Padding = "auto",
             AutoFit = true,
             XField = "dateTimeStr",
-            YField = "power"
+            YField = "power_generator"
         };
 
-    #endregion Power vs Time
+    LineConfig Voltage_inverterTimeConfig = new LineConfig
+        {
+            Padding = "auto",
+            AutoFit = true,
+            XField = "dateTimeStr",
+            YField = "voltage_inverter",
+        };
+
+    LineConfig Current_inverterTimeConfig = new LineConfig
+        {
+            AutoFit = true,
+            Padding = "auto",
+            XField = "dateTimeStr",
+            YField = "current_inverter",
+        };
+
+    LineConfig Power_inverterTimeConfig = new LineConfig
+        {
+            Padding = "auto",
+            AutoFit = true,
+            XField = "dateTimeStr",
+            YField = "power_inverter"
+        };
 }

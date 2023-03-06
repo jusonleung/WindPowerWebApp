@@ -6,24 +6,44 @@
 
 <Tabs>
     <TabPane Key="1">
-        <TabTemplate>Power</TabTemplate>
+        <TabTemplate>Generator Power</TabTemplate>
         <ChildContent>
-            <Scatter Data="WindTurbineData" Config="PowerWindSpeedConfig" />
+            <Scatter Data="WindTurbineData" Config="Power_generatorWindSpeedConfig" />
         </ChildContent>
     </TabPane>
     <TabPane Key="2">
-        <TabTemplate>Voltage</TabTemplate>
+        <TabTemplate>Generator Voltage</TabTemplate>
         <ChildContent>
-            <Scatter Data="WindTurbineData" Config="VoltageWindSpeedConfig" />
+            <Scatter Data="WindTurbineData" Config="Voltage_generatorWindSpeedConfig" />
         </ChildContent>
     </TabPane>
     <TabPane Key="3">
-        <TabTemplate>Current</TabTemplate>
+        <TabTemplate>Generator Current</TabTemplate>
         <ChildContent>
-            <Scatter Data="WindTurbineData" Config="CurrentWindSpeedConfig" />
+            <Scatter Data="WindTurbineData" Config="Current_generatorWindSpeedConfig" />
         </ChildContent>
     </TabPane>
+
     <TabPane Key="4">
+        <TabTemplate>Inverter Power</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="Power_inverterWindSpeedConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="5">
+        <TabTemplate>Inverter Voltage</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="Voltage_inverterWindSpeedConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="6">
+        <TabTemplate>Inverter Current</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="Current_inverterWindSpeedConfig" />
+        </ChildContent>
+    </TabPane>
+
+    <TabPane Key="7">
         <TabTemplate>RPM</TabTemplate>
         <ChildContent>
             <Scatter Data="WindTurbineData" Config="RpmWindSpeedConfig" />
@@ -40,12 +60,10 @@
         WindTurbineData = RawData.Select(d => new DataModelForChart(d)).ToList();
     }
 
-    #region Power vs WindSpeed
-
-    readonly ScatterConfig PowerWindSpeedConfig = new ScatterConfig
+    readonly ScatterConfig Power_generatorWindSpeedConfig = new ScatterConfig
         {
             XField = "windSpeed",
-            YField = "power",
+            YField = "power_generator",
             AutoFit = true,
             PointStyle = new GraphicStyle
             {
@@ -55,14 +73,10 @@
             }
         };
 
-    #endregion Power vs WindSpeed
-
-    #region Voltage vs WindSpeed
-
-    readonly ScatterConfig VoltageWindSpeedConfig = new ScatterConfig
+    readonly ScatterConfig Voltage_generatorWindSpeedConfig = new ScatterConfig
         {
             XField = "windSpeed",
-            YField = "voltage",
+            YField = "voltage_generator",
             AutoFit = true,
             PointStyle = new GraphicStyle
             {
@@ -72,14 +86,10 @@
             }
         };
 
-    #endregion Voltage vs WindSpeed
-
-    #region Current vs WindSpeed
-
-    readonly ScatterConfig CurrentWindSpeedConfig = new ScatterConfig
+    readonly ScatterConfig Current_generatorWindSpeedConfig = new ScatterConfig
         {
             XField = "windSpeed",
-            YField = "current",
+            YField = "current_generator",
             AutoFit = true,
             PointStyle = new GraphicStyle
             {
@@ -89,9 +99,45 @@
             }
         };
 
-    #endregion Current vs WindSpeed
+    readonly ScatterConfig Power_inverterWindSpeedConfig = new ScatterConfig
+        {
+            XField = "windSpeed",
+            YField = "power_inverter",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
 
-    #region RPM vs WindSpeed
+
+    readonly ScatterConfig Voltage_inverterWindSpeedConfig = new ScatterConfig
+        {
+            XField = "windSpeed",
+            YField = "voltage_inverter",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    readonly ScatterConfig Current_inverterWindSpeedConfig = new ScatterConfig
+        {
+            XField = "windSpeed",
+            YField = "current_inverter",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
 
     readonly ScatterConfig RpmWindSpeedConfig = new ScatterConfig
         {
@@ -105,6 +151,4 @@
                 Fill = "#5B8FF9",
             }
         };
-
-    #endregion RPM vs WindSpeed
 }

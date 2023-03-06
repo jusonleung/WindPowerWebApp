@@ -6,21 +6,40 @@
 
 <Tabs>
     <TabPane Key="1">
-        <TabTemplate>Power</TabTemplate>
+        <TabTemplate>Generator Power</TabTemplate>
         <ChildContent>
-            <Scatter Data="WindTurbineData" Config="PowerRPMConfig" />
+            <Scatter Data="WindTurbineData" Config="Power_generatorRPMConfig" />
         </ChildContent>
     </TabPane>
     <TabPane Key="2">
-        <TabTemplate>Voltage</TabTemplate>
+        <TabTemplate>Generator Voltage</TabTemplate>
         <ChildContent>
-            <Scatter Data="WindTurbineData" Config="VoltageRPMConfig" />
+            <Scatter Data="WindTurbineData" Config="Voltage_generatorRPMConfig" />
         </ChildContent>
     </TabPane>
     <TabPane Key="3">
-        <TabTemplate>Current</TabTemplate>
+        <TabTemplate>Generator Current</TabTemplate>
         <ChildContent>
-            <Scatter Data="WindTurbineData" Config="CurrentRPMConfig" />
+            <Scatter Data="WindTurbineData" Config="Current_generatorRPMConfig" />
+        </ChildContent>
+    </TabPane>
+
+    <TabPane Key="4">
+        <TabTemplate>Inverter Power</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="Power_inverterRPMConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="5">
+        <TabTemplate>Inverter Voltage</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="Voltage_inverterRPMConfig" />
+        </ChildContent>
+    </TabPane>
+    <TabPane Key="6">
+        <TabTemplate>Inverter Current</TabTemplate>
+        <ChildContent>
+            <Scatter Data="WindTurbineData" Config="Current_inverterRPMConfig" />
         </ChildContent>
     </TabPane>
 </Tabs>
@@ -34,54 +53,10 @@
         WindTurbineData = RawData.Select(d => new DataModelForChart(d)).ToList();
     }
 
-    #region Power vs RPM
-
-    readonly ScatterConfig PowerRPMConfig = new ScatterConfig
+    readonly ScatterConfig Power_generatorRPMConfig = new ScatterConfig
         {
             XField = "rpm",
-            YField = "power",
-            AutoFit = true,
-            PointStyle = new GraphicStyle
-            {
-                Stroke = "#777777",
-                LineWidth = 1,
-                Fill = "#5B8FF9",
-            },
-            //RegressionLine = new RegressionLineConfig
-            //{
-            //    Type = "linear"
-            //}
-        };
-
-    #endregion Power vs RPM
-
-    #region Voltage vs RPM
-
-    readonly ScatterConfig VoltageRPMConfig = new ScatterConfig
-        {
-            XField = "rpm",
-            YField = "voltage",
-            AutoFit = true,
-            PointStyle = new GraphicStyle
-            {
-                Stroke = "#777777",
-                LineWidth = 1,
-                Fill = "#5B8FF9",
-            },
-            //RegressionLine = new RegressionLineConfig
-            //{
-            //    Type = "linear"
-            //}
-        };
-
-    #endregion Voltage vs RPM
-
-    #region Current vs RPM
-
-    readonly ScatterConfig CurrentRPMConfig = new ScatterConfig
-        {
-            XField = "rpm",
-            YField = "current",
+            YField = "power_generator",
             AutoFit = true,
             PointStyle = new GraphicStyle
             {
@@ -91,5 +66,70 @@
             }
         };
 
-    #endregion Current vs RPM
+
+    readonly ScatterConfig Voltage_generatorRPMConfig = new ScatterConfig
+        {
+            XField = "rpm",
+            YField = "voltage_generator",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    readonly ScatterConfig Current_generatorRPMConfig = new ScatterConfig
+        {
+            XField = "rpm",
+            YField = "current_generator",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    readonly ScatterConfig Power_inverterRPMConfig = new ScatterConfig
+        {
+            XField = "rpm",
+            YField = "power_inverter",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+
+    readonly ScatterConfig Voltage_inverterRPMConfig = new ScatterConfig
+        {
+            XField = "rpm",
+            YField = "voltage_inverter",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
+
+    readonly ScatterConfig Current_inverterRPMConfig = new ScatterConfig
+        {
+            XField = "rpm",
+            YField = "current_inverter",
+            AutoFit = true,
+            PointStyle = new GraphicStyle
+            {
+                Stroke = "#777777",
+                LineWidth = 1,
+                Fill = "#5B8FF9",
+            }
+        };
 }

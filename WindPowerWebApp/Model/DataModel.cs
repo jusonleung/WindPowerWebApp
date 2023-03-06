@@ -8,10 +8,14 @@ namespace WindPowerWebApp.Model
     {
         public float? Latitude { get; set; }
         public float? Longitude { get; set; }
-        [DisplayName("Voltage (W)")]
-        public float? Voltage { get; set; }
-        [DisplayName("Current (A)")]
-        public float? Current { get; set; }
+        [DisplayName("Inverter Voltage (W)")]
+        public float? Voltage_inverter { get; set; }
+        [DisplayName("Inverter Current (A)")]
+        public float? Current_inverter { get; set; }
+        [DisplayName("Generator Voltage (W)")]
+        public float? Voltage_generator { get; set; }
+        [DisplayName("Generator Current (A)")]
+        public float? Current_generator { get; set; }
         [DisplayName("RPM (m/s)")]
         public float? RPM { get; set; }
         [DisplayName("WindSpeed (m/s)")]

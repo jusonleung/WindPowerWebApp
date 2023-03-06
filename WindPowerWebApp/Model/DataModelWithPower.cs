@@ -4,9 +4,12 @@ namespace WindPowerWebApp.Model
 {
     public class DataModelForChart
     {
-        public float? Power { get; set; }
-        public float? Voltage { get; set; }
-        public float? Current { get; set; }
+        public float? Power_generator { get; set; }
+        public float? Voltage_generator { get; set; }
+        public float? Current_generator { get; set; }
+        public float? Power_inverter { get; set; }
+        public float? Voltage_inverter { get; set; }
+        public float? Current_inverter { get; set; }
         public float? RPM { get; set; }
         public float? WindSpeed { get; set; }
         public string DateTimeStr { get; set; }
@@ -16,11 +19,14 @@ namespace WindPowerWebApp.Model
         {
             this.DateTime = data.DateTime;
             this.DateTimeStr = this.DateTime.ToString("M/d HH:mm:ss");
-            this.Current = data.Current;
-            this.Voltage = data.Voltage;
+            this.Current_generator = data.Current_generator;
+            this.Voltage_generator = data.Voltage_generator;
+            this.Current_inverter = data.Current_inverter;
+            this.Voltage_inverter = data.Voltage_inverter;
             this.RPM = data.RPM;
             this.WindSpeed = data.WindSpeed;
-            this.Power = this.Current * this.Voltage;
+            this.Power_generator = this.Current_generator * this.Voltage_generator;
+            this.Power_inverter = this.Current_inverter * this.Voltage_inverter;
         }
     }
 }
