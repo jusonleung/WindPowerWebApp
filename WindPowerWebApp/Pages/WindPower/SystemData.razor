@@ -4,13 +4,18 @@
 
 @page "/system-data"
 
+<GridRow>
+    <GridCol Span="6">
+        <Button Type="@ButtonType.Primary" OnClick="CreateExcel" Icon="@IconType.Outline.Download" Shape="@ButtonShape.Round">Download</Button>
+    </GridCol>
+    <GridCol Span="6">
+        <RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true @bind-Value="@RangePicker" DisabledDate="date => date < Data.First().DateTime.AddDays(-1) || date > DateTime.Now" />
+        <Button Type="@ButtonType.Primary" OnClick="OnClickSubmit">Submit</Button>
+    </GridCol>
+</GridRow>
 
-<button class="btn btn-primary" @onclick="@CreateExcel">Download</button>
 
-<RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true @bind-Value="@RangePicker"
-             @*DisabledDate="date => date < Data.First().DateTime.AddDays(-1) || date > Data.Last().DateTime" *@/>
 
-<Button Type="@ButtonType.Primary" OnClick="OnClickSubmit">Submit</Button>
 <br />
 <br />
 <Table TItem="DataModel"
@@ -38,8 +43,6 @@
 
 @code {
     List<DataModel> Data;
-
-    ITable Table;
 
     int _pageIndex = 1;
     int _pageSize = 20;

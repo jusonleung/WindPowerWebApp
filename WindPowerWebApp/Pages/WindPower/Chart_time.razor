@@ -6,43 +6,76 @@
 
 <PageTitle>Chart over Time</PageTitle>
 
-<RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true
-    DisabledDate="date => date < SmoothedDataForTimeChart.First().DateTime.AddDays(-1) || date > SmoothedDataForTimeChart.Last().DateTime" />
+<GridRow>
+    <GridCol Span="6">
+        <RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true Value="@RangePicker" DisabledDate="date => date < Data.First().DateTime.AddDays(-1) || date > DateTime.Now" />
+    </GridCol>
+    <GridCol Span="6">
+        <Text>Interval:</Text>
+        <AntDesign.InputNumber @bind-Value="interval" Formatter="Format" Min="1"></AntDesign.InputNumber>
+        <Button Type="@ButtonType.Primary" OnClick="OnClickSubmit">Submit</Button>
+    </GridCol>
+        
+</GridRow>
 
-@*<Button Type="@ButtonType.Primary" OnClick="OnClick">Submit</Button>*@
 
-<Tabs >
+
+
+
+
+
+<Tabs>
     <TabPane Key="1">
         <TabTemplate>Voltage</TabTemplate>
         <ChildContent>
-            <Line Data="RangedSmoothedDataForTimeChart" Config="VoltageTimeConfig" />
+            <Line Data="Data" Config="VoltageTimeConfig" @ref="@VoltageChart" />
         </ChildContent>
     </TabPane>
     <TabPane Key="2">
         <TabTemplate>Current</TabTemplate>
         <ChildContent>
-            <Line Data="RangedSmoothedDataForTimeChart" Config="CurrentTimeConfig" />
+            <Line Data="Data" Config="CurrentTimeConfig" @ref="@CurrentChart" />
         </ChildContent>
     </TabPane>
     <TabPane Key="3">
         <TabTemplate>Power</TabTemplate>
         <ChildContent>
-            <Line Data="RangedSmoothedDataForTimeChart" Config="PowerTimeConfig" />
+            <Line Data="Data" Config="PowerTimeConfig" @ref="@PowerChart" />
         </ChildContent>
     </TabPane>
 </Tabs>
 
 @code {
-    List<DataModelForChart> SmoothedDataForTimeChart;
-    List<DataModelForChart> RangedSmoothedDataForTimeChart;
+    List<DataModelForChart> Data;
+
+    DateTime?[] RangePicker = new DateTime?[2];
+
+    IChartComponent VoltageChart;
+    IChartComponent CurrentChart;
+    IChartComponent PowerChart;
 
     int interval = 30;
 
+    private string Format(int value)
+    {
+        return value.ToString() + "s";
+    }
+
     protected override void OnInitialized()
     {
-        List<DataModel> RawData = sqlDbService.GetAllSystemData();
-        SmoothedDataForTimeChart = SmoothDataList(RawData, interval).Select(d => new DataModelForChart(d)).ToList();
-        RangedSmoothedDataForTimeChart = SmoothedDataForTimeChart.ToList();
+        Data = SmoothDataList(sqlDbService.GetAllSystemData(), interval).Select(d => new DataModelForChart(d)).ToList();
+        RangePicker[0] = Data.FirstOrDefault().DateTime;
+        RangePicker[1] = Data.LastOrDefault().DateTime;
+    }
+
+    async void OnClickSubmit()
+    {
+        DateTime endTime = RangePicker.LastOrDefault() ?? DateTime.Now; // if RangePicker.Last is null, use DateTime.Now as end time
+        DateTime startTime = RangePicker.FirstOrDefault().GetValueOrDefault(); // use the first value as start time
+        Data = SmoothDataList(sqlDbService.GetAllSystemData(startTime, endTime), interval).Select(d => new DataModelForChart(d)).ToList();
+        foreach (var chart in new[] { VoltageChart, CurrentChart, PowerChart })
+            if (chart != null)
+                await chart.ChangeData(Data);
     }
 
     List<DataModel> SmoothDataList(List<DataModel> dataList, int intervalSeconds)
