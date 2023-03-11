@@ -4,30 +4,30 @@
 @inherits LayoutComponentBase
 
 <div class="page">
-        <AuthorizeView>
-            <Authorized>
-                <Layout>
-                    <Header Class="header" Style="position:fixed; width:100vw; z-index: 99;">
-                        <NavMenu />
-                    </Header>
-                    <Layout Class="site-layout" Style="background-color:white; margin-top:55px">
-                        <Content Style="margin:16px;">
-                            @Body
-                        </Content>
-                    </Layout>
+    <AuthorizeView>
+        <Authorized>
+            <Layout>
+                <Header Class="header" Style="position:fixed; width:100vw; z-index: 99;">
+                    <NavMenu />
+                </Header>
+                <Layout Class="site-layout" Style="background-color:white; margin-top:55px">
+                    <Content Style="margin:16px;">
+                        @Body
+                    </Content>
                 </Layout>
-            </Authorized>
-            <NotAuthorized>
-                <div style="position: fixed;
+            </Layout>
+        </Authorized>
+        <NotAuthorized>
+            <div style="position: fixed;
                         top: 30%;
                         left: 50%;
                         -webkit-transform: translate(-50%, -50%);
                         transform: translate(-50%, -50%);
                         ">
-                    <LoginView />
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
+                <LoginView />
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
 </div>
 
 @code {

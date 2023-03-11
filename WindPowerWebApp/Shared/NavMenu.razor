@@ -34,9 +34,9 @@
         <span>Chart</span>
     </span>;
 
-    private void Logout()
+    private async void Logout()
     {
-        localStorageService.ClearAsync();
+        await localStorageService.ClearAsync();
         NavManager.NavigateTo("", forceLoad: true);
     }
 }

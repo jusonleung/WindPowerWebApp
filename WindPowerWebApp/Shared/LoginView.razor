@@ -32,11 +32,8 @@
 
     private async void OnFinish(EditContext editContext)
     {
-        LoginModel admin = ((AuthStateProvider)authStateProvider).GetAdmin(loginModel.Username, loginModel.Password);
-        if (admin != null)
-        {
-            await localStorage.SetItemAsync("webdatamodifier_user", admin.Username);
-        }
+        await localStorage.SetItemAsync("username", loginModel.Username);
+        await localStorage.SetItemAsync("password", loginModel.Password);
         NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
     }
 

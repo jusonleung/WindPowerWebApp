@@ -17,7 +17,6 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddAntDesign();
-builder.Services.AddSingleton<ExcelService>();
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>

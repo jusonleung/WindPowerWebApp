@@ -1,7 +1,10 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
+using System.Text;
 using WindPowerWebApp.Model;
+using WindPowerWebApp.Service;
+using System.Security.Cryptography;
 
 namespace WindPowerWebApp.Data
 {
@@ -9,53 +12,51 @@ namespace WindPowerWebApp.Data
     public class AuthStateProvider : AuthenticationStateProvider
     {
 
-        private ILocalStorageService localStorageService;
-        public AuthStateProvider(ILocalStorageService localStorageService)
+        private ILocalStorageService _localStorageService;
+        private SqlDbService _sqlDbService;
+        public AuthStateProvider(ILocalStorageService localStorageService, SqlDbService sqlDbService)
         {
-            this.localStorageService = localStorageService;
+            this._localStorageService = localStorageService;
+            this._sqlDbService = sqlDbService;
         }
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            string user = null;
+            string username = null;
+            string password = null;
+
             try
             {
-                user = await localStorageService.GetItemAsync<string>("webdatamodifier_user");
+                username = await _localStorageService.GetItemAsync<string>("username");
+                password = await _localStorageService.GetItemAsync<string>("password");
             }
             catch
             {
-
             }
-            var admin = Admins.Where(a => a.Username == user).SingleOrDefault();
-            if (admin == null)
+
+            if (username == null || password == null)
             {
-                var anonymous = new ClaimsIdentity();
-                return new AuthenticationState(new ClaimsPrincipal(anonymous));
+                _localStorageService.ClearAsync();
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            }
+
+            SHA256 SHA256 = SHA256.Create();
+            var hahsPw = SHA256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            var dbHashPw = _sqlDbService.GetPasswordHash(username);
+            if (dbHashPw == null || !hahsPw.SequenceEqual(dbHashPw))
+            {
+                _localStorageService.ClearAsync();
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
             else
             {
                 var claims = new List<Claim>();
 
-                claims.Add(new Claim(ClaimTypes.Name, admin.Username));
+                claims.Add(new Claim(ClaimTypes.Name, username));
 
-                var anonymous = new ClaimsIdentity(claims, "customAuthType");
+                var anonymous = new ClaimsIdentity(claims, "user");
 
                 return new AuthenticationState(new ClaimsPrincipal(anonymous));
             }
-        }
-
-
-        public List<LoginModel> Admins = new List<LoginModel>
-            {
-                new LoginModel
-                {
-                    Username = "admin",
-                    Password = "admin"
-                }
-            };
-
-        public LoginModel GetAdmin(string username, string password)
-        {
-            return Admins.Where(a => a.Username == username && a.Password == password).SingleOrDefault();
         }
     }
 }

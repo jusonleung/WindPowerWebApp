@@ -1,92 +1,151 @@
 ﻿@inject SqlDbService sqlDbService
-@inject ExcelService excelService
 @inject Microsoft.JSInterop.IJSRuntime JS
 
 @page "/system-data"
+@using System.Reflection;
+@using System.ComponentModel;
 
-<GridRow>
-    <GridCol Span="2">
-        <Button Type="@ButtonType.Primary" OnClick="CreateExcel" Icon="@IconType.Outline.Download" Shape="@ButtonShape.Round">Download</Button>
-    </GridCol>
-    <GridCol Span="8">
-        <RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true @bind-Value="@RangePicker" DisabledDate="date => date < Data.First().DateTime.AddDays(-1) || date > DateTime.Now" />
-        <Button Type="@ButtonType.Primary" OnClick="OnClickSubmit">Submit</Button>
-    </GridCol>
-</GridRow>
+<Layout Style="background-color:white;">
+    <Sider Theme="SiderTheme.Light" Width="330" Style="padding-right:5px">
+        <h3>
+            Filter
+        </h3>
+        <h6>
+            Time
+        </h6>
+        <RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true @bind-Value="TimeRange" DisabledDate="date => date < FilteredData.First().DateTime.AddDays(-1) || date > DateTime.Now" Size="@DatePickerSize.Default" />
+        @foreach (var numFilter in NumFilterList)
+        {
+            <h6 style="padding-top:10px">
+                @numFilter.Name
+            </h6>
+            //min
+            <AntDesign.InputNumber Step="0.1" Min="numFilter.MaxMinRange.Item1" Max="numFilter.SelectedRange.Item2" @bind-Value="numFilter.SelectedRange.Item1" Size="@InputSize.Small" />
+            //max
+            <AntDesign.InputNumber Step="0.1" Min="numFilter.SelectedRange.Item1" Max="numFilter.MaxMinRange.Item2" @bind-Value="numFilter.SelectedRange.Item2" Style="float:right" Size="@InputSize.Small" />
+            <Slider TValue="(double, double)" @bind-Value="numFilter.SelectedRange" Min="numFilter.MaxMinRange.Item1" Max="numFilter.MaxMinRange.Item2" />
+        }
+        <Button Type="@ButtonType.Primary" Icon="@IconType.Outline.Search" OnClick="OnClickSearch">Search</Button>
+        <Button Type="@ButtonType.Primary" OnClick="CreateExcel" Icon="@IconType.Outline.Download" Shape="@ButtonShape.Round" Style="float:right">Download</Button>
+    </Sider>
+    <Content>
+        <Table TItem="DataModel"
+               DataSource="@FilteredData"
+               Total="_total"
+               @bind-PageIndex="_pageIndex"
+               @bind-PageSize="_pageSize"
+               >
+            <PropertyColumn Property="c=>c.DateTime" Sortable Format="yyyy-MM-dd HH:mm:ss" />
+            
+            @foreach (var numFilter in NumFilterList)
+            {
+                <PropertyColumn Title="@numFilter.Name" Property="c => numFilter.Prop.GetValue(c)" Sortable>
+                    <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString() + " " + numFilter.Unit)</CellRender>
+                </PropertyColumn>
+            }
+        </Table>
+    </Content>
+</Layout>
+
 <br />
-<Table TItem="DataModel"
-       DataSource="@Data"
-       Total="_total"
-       @bind-PageIndex="_pageIndex"
-       @bind-PageSize="_pageSize"
-       >
-    <PropertyColumn Property="c=>c.DateTime" Sortable Format="yyyy-MM-dd HH:mm:ss"/>
-    <PropertyColumn Title="Generator Voltage" Property="c=>c.Voltage_generator" Sortable>
-        <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString()+'V')</CellRender>
-    </PropertyColumn>
 
-    <PropertyColumn Title="Generator Current" Property="c=>c.Current_generator" Sortable>
-        <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString()+'A')</CellRender>
-    </PropertyColumn>
-
-    <PropertyColumn Title="Generator Power" Property="c=>c.Current_generator*c.Voltage_generator" Sortable>
-        <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString()+'W')</CellRender>
-    </PropertyColumn>
-
-    <PropertyColumn Title="Inverter Voltage" Property="c=>c.Voltage_inverter" Sortable>
-        <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString() + 'V')</CellRender>
-    </PropertyColumn>
-
-    <PropertyColumn Title="Inverter Current" Property="c=>c.Current_inverter" Sortable>
-        <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString() + 'A')</CellRender>
-    </PropertyColumn>
-
-    <PropertyColumn Title="Inverter Power" Property="c=>c.Current_inverter*c.Voltage_inverter" Sortable>
-        <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString() + 'W')</CellRender>
-    </PropertyColumn>
-
-    <PropertyColumn Title="Revolutions per minute" Property="c=>c.RPM" Sortable>
-        <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString()+"rpm")</CellRender>
-    </PropertyColumn>
-
-    <PropertyColumn Title="WindSpeed" Property="c=>c.WindSpeed" Sortable>
-        <CellRender Context="cell">@(cell.FieldValue == default ? "--" : cell.FieldValue.ToString()+"m/s")</CellRender>
-    </PropertyColumn>
-</Table>
 
 @code {
-    List<DataModel> Data;
+    List<DataModel> FilteredData;
+    List<DataModel> FullData;
+
+
+    PropertyInfo[] NumProps = typeof(DataModel).GetProperties().Where(p => p.PropertyType != typeof(DateTime) && p.Name != "Latitude" && p.Name != "Longitude").ToArray();
 
     int _pageIndex = 1;
     int _pageSize = 20;
     int _total = 0;
 
-    DateTime?[] RangePicker = new DateTime?[2];
+    DateTime?[] TimeRange = new DateTime?[2];
+
+    class NumFilter
+    {
+        public PropertyInfo Prop;
+        public (double, double) SelectedRange;
+        public (int, int) MaxMinRange;
+        public string Name;
+        public string Unit;
+        public NumFilter(PropertyInfo prop)
+        {
+            Prop = prop;
+            var displayName = ((DisplayNameAttribute)prop.GetCustomAttributes(typeof(DisplayNameAttribute), true).FirstOrDefault() ?? new DisplayNameAttribute(prop.Name)).DisplayName;
+            try
+            {
+                Name = displayName.Substring(0, displayName.LastIndexOf(' '));
+            }
+            catch
+            {
+                Name = displayName;
+            }
+            
+            Unit = displayName.Split().Last();
+            if(Unit.StartsWith('('))
+                Unit = Unit.Substring(1, Unit.Length - 2);
+        }
+    }
+
+    NumFilter[] NumFilterList;
 
     protected override void OnInitialized()
     {
-        Data = sqlDbService.GetAllSystemData();
-        RangePicker[0] = Data.FirstOrDefault().DateTime;
-        RangePicker[1] = Data.LastOrDefault().DateTime;
-        _total = Data.Count;
+        FullData = sqlDbService.GetAllSystemData();
+        if (FullData == null)
+            return;
+        NumFilterList = NumProps.Select(p => new NumFilter(p)).ToArray();
+        FilteredData = FullData.ToList();
+        TimeRange[0] = FilteredData.FirstOrDefault().DateTime;
+        TimeRange[1] = FilteredData.LastOrDefault().DateTime;
+
+        foreach (var f in NumFilterList)
+        {
+            var propValues = FullData.Select(d => (float)f.Prop.GetValue(d));
+            f.SelectedRange = f.MaxMinRange = ((int)propValues.Min(), (int)propValues.Max() + 1);
+        }
+        _total = FilteredData.Count;
     }
 
     MemoryStream excelStream;
 
-    /// <summary>
     /// Create and download the Excel document.
-    /// </summary>
     protected async void CreateExcel()
     {
-        excelStream = excelService.CreateExcel(Data);
+        excelStream = ExcelExporter.ExportToExcel(FilteredData);
         await JS.SaveAs("SystemData.xlsx", excelStream.ToArray());
     }
 
-    void OnClickSubmit()
+    void OnClickSearch()
     {
-        DateTime endTime = RangePicker.LastOrDefault() ?? DateTime.Now; // if RangePicker.Last is null, use DateTime.Now as end time
-        DateTime startTime = RangePicker.FirstOrDefault().GetValueOrDefault(); // use the first value as start time
-        Data = sqlDbService.GetAllSystemData(startTime, endTime);
-        _total = Data.Count;
+        if (TimeRange[0] == null || TimeRange[1] == null)
+            return;
+        FilteredData = FullData.Where(d =>
+            d.DateTime >= TimeRange[0] &&
+            d.DateTime <= TimeRange[1]
+            ).ToList();
+
+        FilteredData = FilteredData.Where(d =>
+        {
+            foreach (var numFilter in NumFilterList)
+            {
+                // Get the property value for the current NumFilter's Prop
+                var propValue = (float?)numFilter.Prop.GetValue(d);
+
+                // Check if the property value is within the SelectedRange
+                if (propValue < numFilter.SelectedRange.Item1 || propValue > numFilter.SelectedRange.Item2)
+                {
+                    // Property value is not within the SelectedRange, so exclude this DataModel
+                    return false;
+                }
+            }
+
+            // All properties are within their respective SelectedRanges, so include this DataModel
+            return true;
+        }).ToList();
+
+        _total = FilteredData.Count;
     }
 }

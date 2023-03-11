@@ -4,6 +4,8 @@ using Dapper;
 using SqlSugar;
 using DocumentFormat.OpenXml.Wordprocessing;
 using GoogleMapsComponents.Maps;
+using System.Collections.Generic;
+using System.Security.Policy;
 
 namespace WindPowerWebApp.Service
 {
@@ -29,8 +31,19 @@ namespace WindPowerWebApp.Service
         public byte[] GetPasswordHash(string username)
         {
             var user = GetSqlSugarClient().Queryable<UserModel>().Where(u => u.Username == username).Single();
+            if (user == null)
+                return null;
             return user.PasswordHash;
         }
+
+        /*
+        DECLARE @password VARCHAR(100) = 'admin';
+        DECLARE @hash VARBINARY(32) = HASHBYTES('SHA2_256', @password);
+
+        INSERT INTO[dbo].[Users]
+        ([Username], [PasswordHash])
+        VALUES('admin', @hash);
+        */
 
         public List<DataModel> GetAllSystemData()
         {
