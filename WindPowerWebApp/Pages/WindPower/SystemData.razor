@@ -29,7 +29,7 @@
         <Button Type="@ButtonType.Primary" OnClick="CreateExcel" Icon="@IconType.Outline.Download" Shape="@ButtonShape.Round" Style="float:right">Download</Button>
     </Sider>
     <Content>
-        <Table TItem="DataModel"
+        <Table TItem="DataModelWithPower"
                DataSource="@FilteredData"
                Total="_total"
                @bind-PageIndex="_pageIndex"
@@ -51,11 +51,11 @@
 
 
 @code {
-    List<DataModel> FilteredData;
-    List<DataModel> FullData;
+    List<DataModelWithPower> FilteredData;
+    List<DataModelWithPower> FullData;
 
 
-    PropertyInfo[] NumProps = typeof(DataModel).GetProperties().Where(p => p.PropertyType != typeof(DateTime) && p.Name != "Latitude" && p.Name != "Longitude").ToArray();
+    PropertyInfo[] NumProps = typeof(DataModelWithPower).GetProperties().Where(p => p.PropertyType != typeof(DateTime) && p.Name != "Latitude" && p.Name != "Longitude").ToArray();
 
     int _pageIndex = 1;
     int _pageSize = 20;
@@ -93,7 +93,7 @@
 
     protected override void OnInitialized()
     {
-        FullData = sqlDbService.GetAllSystemData();
+        FullData = sqlDbService.GetAllSystemData().Select(d => new DataModelWithPower(d)).ToList();
         if (FullData == null)
             return;
         NumFilterList = NumProps.Select(p => new NumFilter(p)).ToArray();
@@ -103,7 +103,7 @@
 
         foreach (var f in NumFilterList)
         {
-            var propValues = FullData.Select(d => (float)f.Prop.GetValue(d));
+            var propValues = FilteredData.Select(d => (float)f.Prop.GetValue(d));
             f.SelectedRange = f.MaxMinRange = ((int)propValues.Min(), (int)propValues.Max() + 1);
         }
         _total = FilteredData.Count;

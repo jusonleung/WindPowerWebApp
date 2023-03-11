@@ -6,14 +6,15 @@ namespace WindPowerWebApp.Service
 {
     public class ExcelExporter
     {
-        public static MemoryStream ExportToExcel(List<DataModel> dataModels)
+        public static MemoryStream ExportToExcel<T>(List<T> objs)
         {
             using (var package = new ExcelPackage())
             {
                 var worksheet = package.Workbook.Worksheets.Add("SystemData");
+                var props = typeof(T).GetProperties();
 
                 // Add column headers
-                var headers = typeof(DataModel).GetProperties()
+                var headers = props
                     .Select(p => (DisplayNameAttribute)p.GetCustomAttributes(typeof(DisplayNameAttribute), true).FirstOrDefault() ?? new DisplayNameAttribute(p.Name))
                     .Select(a => a.DisplayName);
                 int columnCount = 1;
@@ -25,14 +26,14 @@ namespace WindPowerWebApp.Service
 
                 // Add rows
                 int rowCount = 2;
-                foreach (var dataModel in dataModels)
+                foreach (var obj in objs)
                 {
                     columnCount = 1;
-                    foreach (var property in typeof(DataModel).GetProperties())
+                    foreach (var property in props)
                     {
                         if (property.PropertyType == typeof(DateTime))
                             worksheet.Cells[rowCount, columnCount].Style.Numberformat.Format = "yyyy-MM-dd hh:mm:ss";
-                        var cellValue = property.GetValue(dataModel);
+                        var cellValue = property.GetValue(obj);
                         worksheet.Cells[rowCount, columnCount].Value = cellValue;
                         columnCount++;
                     }
