@@ -6,7 +6,7 @@ namespace WindPowerWebApp.Service
 {
     public class ExcelExporter
     {
-        public static MemoryStream ExportToExcel<T>(List<T> objs)
+        public MemoryStream ExportToExcel<T>(List<T> objs)
         {
             using (var package = new ExcelPackage())
             {

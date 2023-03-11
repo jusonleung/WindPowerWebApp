@@ -2,90 +2,81 @@
 @inject NavigationManager NavManager
 
 @page "/chart/time"
-@using Microsoft.AspNetCore.WebUtilities;
 
 <PageTitle>Chart over Time</PageTitle>
 
-<RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true Value="@RangePicker" DisabledDate="date => date < Data.First().DateTime.AddDays(-1) || date > DateTime.Now" />
+<RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true Value="@RangePicker" DisabledDate="date => date < SelectedData.First().DateTime.AddDays(-1) || date > DateTime.Now" />
 <Text style="margin-left:15px">Interval:</Text>
 <AntDesign.InputNumber @bind-Value="interval" Formatter="Format" Min="1"></AntDesign.InputNumber>
 <Button Type="@ButtonType.Primary" OnClick="OnClickSubmit">Submit</Button>
 
 
 <Tabs>
-    <TabPane Key="1">
-        <TabTemplate>Generator Voltage</TabTemplate>
-        <ChildContent>
-            <Line Data="Data" Config="Voltage_generatorTimeConfig" @ref="@Voltage_generatorChart" />
-        </ChildContent>
-    </TabPane>
-    <TabPane Key="2">
-        <TabTemplate>Generator Current</TabTemplate>
-        <ChildContent>
-            <Line Data="Data" Config="Current_generatorTimeConfig" @ref="@Current_generatorChart" />
-        </ChildContent>
-    </TabPane>
-    <TabPane Key="3">
-        <TabTemplate>Generator Power</TabTemplate>
-        <ChildContent>
-            <Line Data="Data" Config="Power_generatorTimeConfig" @ref="@Power_generatorChart" />
-        </ChildContent>
-    </TabPane>
-    <TabPane Key="4">
-        <TabTemplate>Inverter Voltage</TabTemplate>
-        <ChildContent>
-            <Line Data="Data" Config="Voltage_inverterTimeConfig" @ref="@Voltage_inverterChart" />
-        </ChildContent>
-    </TabPane>
-    <TabPane Key="5">
-        <TabTemplate>Inverter Current</TabTemplate>
-        <ChildContent>
-            <Line Data="Data" Config="Current_inverterTimeConfig" @ref="@Current_inverterChart" />
-        </ChildContent>
-    </TabPane>
-    <TabPane Key="6">
-        <TabTemplate>Inverter Power</TabTemplate>
-        <ChildContent>
-            <Line Data="Data" Config="Power_inverterTimeConfig" @ref="@Power_inverterChart" />
-        </ChildContent>
-    </TabPane>
+    @foreach (var c in charts)
+    {
+        <TabPane Key="@c.Title">
+            <TabTemplate>@c.Title</TabTemplate>
+            <ChildContent>
+                <Line Data="SelectedData" Config="c.Config" @ref="c.ChartComponent" />
+            </ChildContent>
+        </TabPane>
+    }
 </Tabs>
 
 @code {
-    List<DataModelForChart> Data;
+    List<DataModelForChart> SelectedData;
+    List<DataModel> RawData;
+
 
     DateTime?[] RangePicker = new DateTime?[2];
 
-    IChartComponent Voltage_generatorChart;
-    IChartComponent Current_generatorChart;
-    IChartComponent Power_generatorChart;
-
-    IChartComponent Voltage_inverterChart;
-    IChartComponent Current_inverterChart;
-    IChartComponent Power_inverterChart;
-
     int interval = 30;
+
+    class LineChartComponents
+    {
+        public PropertyInfo Prop;
+        public string Title;
+        public IChartComponent ChartComponent;
+        public LineConfig Config;
+
+        public LineChartComponents(PropertyInfo prop, string against = "dateTimeStr")
+        {
+            Prop = prop;
+            Title = ((DisplayNameAttribute)prop.GetCustomAttributes(typeof(DisplayNameAttribute), true).FirstOrDefault() ?? new DisplayNameAttribute(prop.Name)).DisplayName;
+            Config = new LineConfig
+                {
+                    AutoFit = true,
+                    Padding = "auto",
+                    XField = against,
+                    YField = prop.Name.ToLower()
+                };
+        }
+    }
+
+    LineChartComponents[] charts;
 
     private string Format(int value)
     {
-        return value.ToString() + "s";
+        return value.ToString() + " s";
     }
 
     protected override void OnInitialized()
     {
-        Data = SmoothDataList(sqlDbService.GetAllSystemData(), interval).Select(d => new DataModelForChart(d)).ToList();
-        RangePicker[0] = Data.FirstOrDefault().DateTime;
-        RangePicker[1] = Data.LastOrDefault().DateTime;
+        RawData = sqlDbService.GetAllSystemData();
+        SelectedData = SmoothDataList(RawData, interval).Select(d => new DataModelForChart(d)).ToList();
+        RangePicker[0] = SelectedData.FirstOrDefault().DateTime;
+        RangePicker[1] = SelectedData.LastOrDefault().DateTime;
+        charts = typeof(DataModelForChart).GetProperties().Where(p => p.PropertyType == typeof(float?)).Select(p => new LineChartComponents(p)).ToArray();
     }
 
     async void OnClickSubmit()
     {
         DateTime endTime = RangePicker.LastOrDefault() ?? DateTime.Now; // if RangePicker.Last is null, use DateTime.Now as end time
         DateTime startTime = RangePicker.FirstOrDefault().GetValueOrDefault(); // use the first value as start time
-        Data = SmoothDataList(sqlDbService.GetAllSystemData(startTime, endTime), interval).Select(d => new DataModelForChart(d)).ToList();
-        foreach (var chart in new[] { Voltage_generatorChart, Current_generatorChart, Power_generatorChart, Voltage_inverterChart, Current_inverterChart, Power_inverterChart })
+        SelectedData = SmoothDataList(RawData.Where(d => d.DateTime >= startTime && d.DateTime <= endTime).ToList(), interval).Select(d => new DataModelForChart(d)).ToList();
+        foreach (var chart in charts.Select(s => s.ChartComponent))
             if (chart != null)
-                await chart.ChangeData(Data);
+                await chart.ChangeData(SelectedData);
     }
 
     List<DataModel> SmoothDataList(List<DataModel> dataList, int intervalSeconds)
@@ -180,52 +171,4 @@
 
         return result;
     }
-
-    LineConfig Voltage_generatorTimeConfig = new LineConfig
-        {
-            Padding = "auto",
-            AutoFit = true,
-            XField = "dateTimeStr",
-            YField = "voltage_generator",
-        };
-
-    LineConfig Current_generatorTimeConfig = new LineConfig
-        {
-            AutoFit = true,
-            Padding = "auto",
-            XField = "dateTimeStr",
-            YField = "current_generator",
-        };
-
-    LineConfig Power_generatorTimeConfig = new LineConfig
-        {
-            Padding = "auto",
-            AutoFit = true,
-            XField = "dateTimeStr",
-            YField = "power_generator"
-        };
-
-    LineConfig Voltage_inverterTimeConfig = new LineConfig
-        {
-            Padding = "auto",
-            AutoFit = true,
-            XField = "dateTimeStr",
-            YField = "voltage_inverter",
-        };
-
-    LineConfig Current_inverterTimeConfig = new LineConfig
-        {
-            AutoFit = true,
-            Padding = "auto",
-            XField = "dateTimeStr",
-            YField = "current_inverter",
-        };
-
-    LineConfig Power_inverterTimeConfig = new LineConfig
-        {
-            Padding = "auto",
-            AutoFit = true,
-            XField = "dateTimeStr",
-            YField = "power_inverter"
-        };
 }

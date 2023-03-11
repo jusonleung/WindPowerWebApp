@@ -1,0 +1,27 @@
+﻿@inject SqlDbService sqlDbService
+
+<Tabs>
+    @foreach (var c in charts)
+    {
+            <TabPane Key="@c.Title">
+                <TabTemplate>@c.Title</TabTemplate>
+                <ChildContent>
+                    <Scatter Data="WindTurbineData" Config="c.Config" />
+                </ChildContent>
+            </TabPane>
+    }
+</Tabs>
+
+@code {
+    [Parameter]
+    public string against { get; set; }
+
+    List<DataModelForChart> WindTurbineData;
+    ScatterChartComponents[] charts;
+
+    protected override void OnInitialized()
+    {
+        WindTurbineData = sqlDbService.GetAllSystemData().Select(d => new DataModelForChart(d)).ToList();
+        charts = typeof(DataModelForChart).GetProperties().Where(p => p.PropertyType == typeof(float?) && p.Name != against).Select(p => new ScatterChartComponents(p, against.ToLower())).ToArray();
+    }
+}

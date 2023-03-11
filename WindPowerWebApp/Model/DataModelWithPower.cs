@@ -27,7 +27,7 @@ namespace WindPowerWebApp.Model
 
         public float? RPM { get; set; }
 
-        [DisplayName("WindSpeed (m/s)")]
+        [DisplayName("Wind Speed (m/s)")]
         public float? WindSpeed { get; set; }
         public float? Latitude { get; set; }
         public float? Longitude { get; set; }

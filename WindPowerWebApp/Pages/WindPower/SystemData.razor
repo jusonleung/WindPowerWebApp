@@ -1,9 +1,8 @@
 ﻿@inject SqlDbService sqlDbService
+@inject ExcelExporter excelExporter
 @inject Microsoft.JSInterop.IJSRuntime JS
 
 @page "/system-data"
-@using System.Reflection;
-@using System.ComponentModel;
 
 <Layout Style="background-color:white;">
     <Sider Theme="SiderTheme.Light" Width="330" Style="padding-right:5px">
@@ -117,7 +116,7 @@
     /// Create and download the Excel document.
     protected async void CreateExcel()
     {
-        excelStream = ExcelExporter.ExportToExcel(FilteredData);
+        excelStream = excelExporter.ExportToExcel(FilteredData);
         await JS.SaveAs("SystemData.xlsx", excelStream.ToArray());
     }
 
