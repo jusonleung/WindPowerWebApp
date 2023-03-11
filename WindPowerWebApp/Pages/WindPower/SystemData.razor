@@ -34,7 +34,8 @@
                Total="_total"
                @bind-PageIndex="_pageIndex"
                @bind-PageSize="_pageSize"
-               >
+               Loading="@Loading"
+        >
             <PropertyColumn Property="c=>c.DateTime" Sortable Format="yyyy-MM-dd HH:mm:ss" />
             
             @foreach (var numFilter in NumFilterList)
@@ -54,6 +55,7 @@
     List<DataModelWithPower> FilteredData;
     List<DataModelWithPower> FullData;
 
+    bool Loading = true;
 
     PropertyInfo[] NumProps = typeof(DataModelWithPower).GetProperties().Where(p => p.PropertyType != typeof(DateTime) && p.Name != "Latitude" && p.Name != "Longitude").ToArray();
 
@@ -82,7 +84,7 @@
             {
                 Name = displayName;
             }
-            
+
             Unit = displayName.Split().Last();
             if(Unit.StartsWith('('))
                 Unit = Unit.Substring(1, Unit.Length - 2);
@@ -107,6 +109,7 @@
             f.SelectedRange = f.MaxMinRange = ((int)propValues.Min(), (int)propValues.Max() + 1);
         }
         _total = FilteredData.Count;
+        Loading = false;
     }
 
     MemoryStream excelStream;
@@ -120,6 +123,7 @@
 
     void OnClickSearch()
     {
+        Loading = true;
         if (TimeRange[0] == null || TimeRange[1] == null)
             return;
         FilteredData = FullData.Where(d =>
@@ -147,5 +151,6 @@
         }).ToList();
 
         _total = FilteredData.Count;
+        Loading = false;
     }
 }
