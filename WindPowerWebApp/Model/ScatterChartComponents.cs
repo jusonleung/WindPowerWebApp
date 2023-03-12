@@ -27,10 +27,10 @@ namespace WindPowerWebApp.Model
                     LineWidth = 1,
                     Fill = "#5B8FF9",
                 },
-                RegressionLine = new RegressionLineConfig
-                {
-                    Type = "linear",
-                }
+                //RegressionLine = new RegressionLineConfig
+                //{
+                //    Type = "log",
+                //}
             };
         }
     }
