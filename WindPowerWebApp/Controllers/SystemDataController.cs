@@ -29,7 +29,7 @@ namespace WindPowerWebApp.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult Post(DataModel data)
+        public IActionResult Post(List<DataModel> data)
         {
             try
             {

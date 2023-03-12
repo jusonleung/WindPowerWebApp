@@ -63,7 +63,7 @@
     protected override void OnInitialized()
     {
         RawData = sqlDbService.GetAllSystemData();
-        SelectedData = SmoothDataList(RawData, interval).Select(d => new DataModelForChart(d)).ToList();
+        SelectedData = SplitAndSmoothDataList(RawData, interval).Select(d => new DataModelForChart(d)).ToList();
         RangePicker[0] = SelectedData.FirstOrDefault().DateTime;
         RangePicker[1] = SelectedData.LastOrDefault().DateTime;
         charts = typeof(DataModelForChart).GetProperties().Where(p => p.PropertyType == typeof(float?)).Select(p => new LineChartComponents(p)).ToArray();
@@ -73,7 +73,7 @@
     {
         DateTime endTime = RangePicker.LastOrDefault() ?? DateTime.Now; // if RangePicker.Last is null, use DateTime.Now as end time
         DateTime startTime = RangePicker.FirstOrDefault().GetValueOrDefault(); // use the first value as start time
-        SelectedData = SmoothDataList(RawData.Where(d => d.DateTime >= startTime && d.DateTime <= endTime).ToList(), interval).Select(d => new DataModelForChart(d)).ToList();
+        SelectedData = SplitAndSmoothDataList(RawData.Where(d => d.DateTime >= startTime && d.DateTime <= endTime).ToList(), interval).Select(d => new DataModelForChart(d)).ToList();
         foreach (var chart in charts.Select(s => s.ChartComponent))
             if (chart != null)
                 await chart.ChangeData(SelectedData);
@@ -169,6 +169,48 @@
             currentTime = currentTime.Add(interval);
         }
 
+        return result;
+    }
+
+    List<List<DataModel>> SplitDataList(List<DataModel> dataList)
+    {
+        List<List<DataModel>> result = new List<List<DataModel>>();
+        if (dataList == null || dataList.Count == 0)
+        {
+            return result;
+        }
+
+        int startIndex = 0;
+        DateTime prevDateTime = dataList[0].DateTime;
+
+        for (int i = 1; i < dataList.Count; i++)
+        {
+            DateTime currDateTime = dataList[i].DateTime;
+            TimeSpan interval = currDateTime - prevDateTime;
+            if (interval.TotalHours >= 2)
+            {
+                List<DataModel> subList = dataList.GetRange(startIndex, i - startIndex);
+                result.Add(subList);
+                startIndex = i;
+            }
+            prevDateTime = currDateTime;
+        }
+
+        // add the final sublist
+        List<DataModel> finalSubList = dataList.GetRange(startIndex, dataList.Count - startIndex);
+        result.Add(finalSubList);
+
+        return result;
+    }
+
+    List<DataModel> SplitAndSmoothDataList(List<DataModel> dataList, int intervalSeconds)
+    {
+        var splitedData = SplitDataList(dataList);
+        List<DataModel> result = new List<DataModel>();
+        foreach (var d in splitedData)
+        {
+            result = result.Concat(SmoothDataList(d, intervalSeconds)).ToList();
+        }
         return result;
     }
 }

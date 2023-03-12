@@ -69,6 +69,11 @@ namespace WindPowerWebApp.Service
             GetSqlSugarClient().Insertable(data).ExecuteCommand();
         }
 
+        public void AddSystemData(List<DataModel> data)
+        {
+            GetSqlSugarClient().Insertable(data).ExecuteCommand();
+        }
+
         public LatLngLiteral GetLastestPosition()
         {
             var result = GetSqlSugarClient().Queryable<DataModel>()
