@@ -5,7 +5,6 @@
 
 <PageTitle>Chart over Time</PageTitle>
 
-<RangePicker TValue="DateTime?[]" ShowTime='@("HH:mm")' AllowClear=true Value="@RangePicker" DisabledDate="date => date < SelectedData.First().DateTime.AddDays(-1) || date > DateTime.Now" />
 <Text style="margin-left:15px">Interval:</Text>
 <AntDesign.InputNumber @bind-Value="interval" Formatter="Format" Min="1"></AntDesign.InputNumber>
 <Button Type="@ButtonType.Primary" OnClick="OnClickSubmit">Submit</Button>
@@ -27,9 +26,6 @@
     List<DataModelForChart> SelectedData;
     List<DataModel> RawData;
 
-
-    DateTime?[] RangePicker = new DateTime?[2];
-
     int interval = 30;
 
     class LineChartComponents
@@ -48,7 +44,12 @@
                     AutoFit = true,
                     Padding = "auto",
                     XField = against,
-                    YField = prop.Name.ToLower()
+                    YField = prop.Name.ToLower(),
+                    Slider = new Slider
+                    {
+                        Start = 0,
+                        End = 1
+                    }
                 };
         }
     }
@@ -64,16 +65,12 @@
     {
         RawData = sqlDbService.GetAllSystemData();
         SelectedData = SplitAndSmoothDataList(RawData, interval).Select(d => new DataModelForChart(d)).ToList();
-        RangePicker[0] = SelectedData.FirstOrDefault().DateTime;
-        RangePicker[1] = SelectedData.LastOrDefault().DateTime;
         charts = typeof(DataModelForChart).GetProperties().Where(p => p.PropertyType == typeof(float?)).Select(p => new LineChartComponents(p)).ToArray();
     }
 
     async void OnClickSubmit()
     {
-        DateTime endTime = RangePicker.LastOrDefault() ?? DateTime.Now; // if RangePicker.Last is null, use DateTime.Now as end time
-        DateTime startTime = RangePicker.FirstOrDefault().GetValueOrDefault(); // use the first value as start time
-        SelectedData = SplitAndSmoothDataList(RawData.Where(d => d.DateTime >= startTime && d.DateTime <= endTime).ToList(), interval).Select(d => new DataModelForChart(d)).ToList();
+        SelectedData = SplitAndSmoothDataList(RawData, interval).Select(d => new DataModelForChart(d)).ToList();
         foreach (var chart in charts.Select(s => s.ChartComponent))
             if (chart != null)
                 await chart.ChangeData(SelectedData);

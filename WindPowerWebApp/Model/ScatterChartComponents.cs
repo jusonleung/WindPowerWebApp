@@ -26,6 +26,10 @@ namespace WindPowerWebApp.Model
                     Stroke = "#777777",
                     LineWidth = 1,
                     Fill = "#5B8FF9",
+                },
+                RegressionLine = new RegressionLineConfig
+                {
+                    Type = "linear",
                 }
             };
         }
