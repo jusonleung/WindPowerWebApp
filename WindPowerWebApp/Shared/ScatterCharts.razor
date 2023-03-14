@@ -22,6 +22,6 @@
     protected override void OnInitialized()
     {
         WindTurbineData = sqlDbService.GetAllSystemData().Select(d => new DataModelForChart(d)).ToList();
-        charts = typeof(DataModelForChart).GetProperties().Where(p => p.PropertyType == typeof(float?) && p.Name != against).Select(p => new ScatterChartComponents(p, against.ToLower())).ToArray();
+        charts = typeof(DataModelForChart).GetProperties().Where(p => p.PropertyType == typeof(float?) && p.Name.ToLower() != against.ToLower()).Select(p => new ScatterChartComponents(p, against)).ToArray();
     }
 }

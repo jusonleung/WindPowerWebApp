@@ -6,7 +6,7 @@
 <div class="page">
     <AuthorizeView>
         <Authorized>
-            <Layout>
+            <Layout Class="layout" Style="min-height:100">
                 <Header Class="header" Style="position:fixed; width:100vw; z-index: 99;">
                     <NavMenu />
                 </Header>
@@ -14,7 +14,37 @@
                     <Content Style="margin:16px;">
                         @Body
                     </Content>
+
                 </Layout>
+                <Footer Style="align-items:end">
+                    <Space>
+                        <Split>
+                            <Divider Type="DirectionVHType.Vertical" />
+                        </Split>
+                        <ChildContent>
+                            <SpaceItem>
+                                The Hong Kong Polytechnic University
+                            </SpaceItem>
+                            <SpaceItem>
+                                FENG Inter-Departmental Final Year Project 2022/23
+                            </SpaceItem>
+                            <SpaceItem>
+                                Floating Wind Power Generation (EE)
+                            </SpaceItem>
+                        </ChildContent>
+                    </Space>
+
+
+                    <Space Style="float:right">
+                        <SpaceItem>
+                            <img height="50" src="https://www.polyu.edu.hk/assets/img/main-logo-3x.png" />
+                        </SpaceItem>
+                        <SpaceItem>
+                            <img height="50" src="https://www.polyu.edu.hk/feng/-/media/department/feng/setting/feng.png?bc=ffffff&h=192&mw=1050&hash=280081FBF8E674E88D656EE7CA055171" />
+                        </SpaceItem>
+                    </Space>
+
+                </Footer>
             </Layout>
         </Authorized>
         <NotAuthorized>

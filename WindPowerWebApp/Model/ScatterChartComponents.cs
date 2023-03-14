@@ -20,17 +20,13 @@ namespace WindPowerWebApp.Model
                 AutoFit = true,
                 Padding = "auto",
                 XField = against,
-                YField = prop.Name.ToLower(),
+                YField = prop.Name == "WindSpeed" ? "windSpeed" : prop.Name.ToLower(),
                 PointStyle = new GraphicStyle
                 {
                     Stroke = "#777777",
                     LineWidth = 1,
                     Fill = "#5B8FF9",
-                },
-                //RegressionLine = new RegressionLineConfig
-                //{
-                //    Type = "log",
-                //}
+                }
             };
         }
     }

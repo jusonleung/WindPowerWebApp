@@ -46,7 +46,7 @@
                     AutoFit = true,
                     Padding = "auto",
                     XField = against,
-                    YField = prop.Name.ToLower(),
+                    YField = prop.Name == "WindSpeed" ? "windSpeed" : prop.Name.ToLower(),
                     Slider = new Slider
                     {
                         Start = 0,
