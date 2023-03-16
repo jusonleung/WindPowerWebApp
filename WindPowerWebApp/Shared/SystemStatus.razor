@@ -1,9 +1,9 @@
 ﻿@inject SqlDbService sqlDbService
-@inject NavigationManager NavigationManager
+@inject SystemControlService systemControlService
 
-<Descriptions Title="Lastest Status" Bordered Size="small">
+<Descriptions Title="Latest Status" Bordered Size="small">
     <DescriptionsItem Title="Status" Span="1">
-        @if (isOnline)
+        @if (Status.Online.GetValueOrDefault())
         {
             <Badge Status="@BadgeStatus.Processing" Text="Running"></Badge>
         }
@@ -12,71 +12,97 @@
             <Badge Status="@BadgeStatus.Default" Text="Off"></Badge>
         }
     </DescriptionsItem>
-    <DescriptionsItem Title="DateTime" Span="2">@data.DateTime.ToString("yyyy-MM-dd HH:mm:ss")</DescriptionsItem>
-    <DescriptionsItem Title="RPM">@data.NullorAddUnit(data.RPM,"")</DescriptionsItem>
-    <DescriptionsItem Title="Wind Speed">@data.NullorAddUnit(data.WindSpeed," m/s")</DescriptionsItem>
+    <DescriptionsItem Title="DateTime" Span="2">@Status.SystemData.DateTime.ToString("yyyy-MM-dd HH:mm:ss")</DescriptionsItem>
+
+    <DescriptionsItem Title="Sending" Span="1">
+        @if (Status.Sending.GetValueOrDefault())
+        {
+            <Badge Status="@BadgeStatus.Processing" Text="Sending"></Badge>
+        }
+        else
+        {
+            <Badge Status="@BadgeStatus.Default" Text="Off"></Badge>
+        }
+    </DescriptionsItem>
+    <DescriptionsItem Title="Interval" Span="2">
+        @if (Status.Interval == null)
+        {
+            <div>-</div>
+        }
+        else
+        {
+            <div>@Status.Interval s</div>
+        }
+    </DescriptionsItem>
+
+    <DescriptionsItem Title="RPM">@Status.SystemData.NullorAddUnit(Status.SystemData.RPM,"")</DescriptionsItem>
+    <DescriptionsItem Title="Wind Speed">@Status.SystemData.NullorAddUnit(Status.SystemData.WindSpeed," m/s")</DescriptionsItem>
 </Descriptions>
 <h6 style="margin-top:10px">Generater</h6>
 <Descriptions Bordered Size="small">
-    <DescriptionsItem Title="Voltage">@data.NullorAddUnit(data.Voltage_generator," V")</DescriptionsItem>
-    <DescriptionsItem Title="Current">@data.NullorAddUnit(data.Current_generator," A")</DescriptionsItem>
-    <DescriptionsItem Title="Power">@data.NullorAddUnit(data.Voltage_generator*data.Current_generator," W")</DescriptionsItem>
+    <DescriptionsItem Title="Voltage">@Status.SystemData.NullorAddUnit(Status.SystemData.Voltage_generator," V")</DescriptionsItem>
+    <DescriptionsItem Title="Current">@Status.SystemData.NullorAddUnit(Status.SystemData.Current_generator," A")</DescriptionsItem>
+    <DescriptionsItem Title="Power">@Status.SystemData.NullorAddUnit(Status.SystemData.Voltage_generator*Status.SystemData.Current_generator," W")</DescriptionsItem>
 </Descriptions>
 <h6 style="margin-top:10px">Inverter</h6>
 <Descriptions Bordered Size="small">
-    <DescriptionsItem Title="Voltage">@data.NullorAddUnit(data.Voltage_inverter," V")</DescriptionsItem>
-    <DescriptionsItem Title="Current">@data.NullorAddUnit(data.Current_inverter," A")</DescriptionsItem>
-    <DescriptionsItem Title="Power">@data.NullorAddUnit(data.Voltage_inverter*data.Current_inverter," W")</DescriptionsItem>
+    <DescriptionsItem Title="Voltage">@Status.SystemData.NullorAddUnit(Status.SystemData.Voltage_inverter," V")</DescriptionsItem>
+    <DescriptionsItem Title="Current">@Status.SystemData.NullorAddUnit(Status.SystemData.Current_inverter," A")</DescriptionsItem>
+    <DescriptionsItem Title="Power">@Status.SystemData.NullorAddUnit(Status.SystemData.Voltage_inverter*Status.SystemData.Current_inverter," W")</DescriptionsItem>
 </Descriptions>
 
 @code {
-    bool isOnline;
     int onlineCheckCount = 0;
-    DataModel data;
     static System.Timers.Timer _timer;
+
+    [Parameter]
+    public RpiStatusModel Status { get; set; }
+    [Parameter]
+    public EventCallback<RpiStatusModel> StatusChanged { get; set; }
+
+
+    HttpClient client = new HttpClient();
 
     protected async override void OnInitialized()
     {
-        data = sqlDbService.GetLatestSystemData();
-        _timer = new System.Timers.Timer(2000);
+        Status = new RpiStatusModel { SystemData = sqlDbService.GetLatestSystemData() };
+        _timer = new System.Timers.Timer(3000);
         _timer.Elapsed += RefreshStatus;
+        await RefreshStatus();
         _timer.Enabled = true;
     }
 
-    public async void RefreshStatus(Object source, System.Timers.ElapsedEventArgs e)
+    async void RefreshStatus(Object source, System.Timers.ElapsedEventArgs e)
     {
-        var newdata = sqlDbService.GetLatestSystemData();
-        if (data.DateTime == newdata.DateTime)
-            onlineCheckCount++;
+        await RefreshStatus();
+    }
+
+    async Task RefreshStatus()
+    {
+        var rpi_res = await systemControlService.PingAsync();
+        if (rpi_res == null)
+        {
+            //rpi is offline
+            Status.Online = false;
+            Status.Sending = false;
+            _timer.Interval = 10000;
+            var newdata = sqlDbService.GetLatestSystemData();
+            if (Status.SystemData == null || Status.SystemData.DateTime < newdata.DateTime)
+            {
+                Status = new RpiStatusModel { SystemData = newdata };
+            }
+        }
         else
         {
-            data = newdata;
-            isOnline = true;
-            onlineCheckCount = 0;
-        }
-
-        if (onlineCheckCount >= 5)
-        {
-            onlineCheckCount = 0;
-            isOnline = false;
+            //rpi is online
+            Status = rpi_res;
+            _timer.Interval = 3000;
         }
 
         await InvokeAsync(async () =>
         {
+            await StatusChanged.InvokeAsync(Status);
             StateHasChanged();
         });
     }
-
-    public void Dispose()
-    {
-        _timer?.Dispose();
-    }
-
-    readonly GaugeConfig config1 = new GaugeConfig
-        {
-            Width = 400,
-            Height = 400,
-            Percent = 64,
-            Range = new double[] { 0, 25, 50, 75, 100 },
-        };
 }

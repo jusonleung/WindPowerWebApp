@@ -10,7 +10,7 @@ namespace WindPowerWebApp.Model
         public float? Longitude { get; set; }
         public string NullorAddUnit(float? num, string unit)
         {
-            return num == null ? "==" : num.Value.ToString("n3") + unit;
+            return num == null ? "-" : num.Value.ToString("n3") + unit;
         }
     }
 }

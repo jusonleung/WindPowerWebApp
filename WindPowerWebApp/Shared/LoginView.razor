@@ -1,5 +1,4 @@
 ﻿@inject NavigationManager NavManager
-@inject AuthenticationStateProvider authStateProvider
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 
 
@@ -15,9 +14,6 @@
     <FormItem Label="Password">
         <InputPassword @bind-Value="@context.Password" />
     </FormItem>
-    @*        <FormItem WrapperColOffset="8" WrapperColSpan="16">
-    <Checkbox @bind-Value="@rememberMe">Remember me</Checkbox>
-    </FormItem>*@
     <FormItem WrapperColOffset="8" WrapperColSpan="16">
         <Button Type="@ButtonType.Primary" HtmlType="submit">
             Submit
@@ -27,7 +23,6 @@
 
 @code {
     private LoginModel loginModel = new();
-    //private bool rememberMe;
 
     private async void OnFinish(EditContext editContext)
     {

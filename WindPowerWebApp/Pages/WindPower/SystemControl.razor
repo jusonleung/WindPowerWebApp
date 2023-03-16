@@ -1,4 +1,5 @@
 ﻿@inject SqlDbService sqlDbService
+@inject SystemControlService systemControlService
 
 @page "/system-control"
 
@@ -6,113 +7,60 @@
 
 
 <GridRow>
-    <GridCol Span="6">
-        <h3>Pitch Angle</h3>
-        <h5>
-            Auto Mode
-            <Switch CheckedChildren="On" UnCheckedChildren="Off" Checked="@_pitchAutoSwitch" Loading="@_isPitchModeLoading" Control OnClick="pitchModeSwitch" />
+    <GridCol Span="4">
+        <h5 style="margin:20px">
+            Sending
+            <Switch CheckedChildren="On" UnCheckedChildren="Off" Checked="@Status.Sending.GetValueOrDefault()" Loading="@_isSendingLoading" OnClick="SendingSwitch" Disabled="@Status.Online.GetValueOrDefault()"/>
         </h5>
-        <br />
-        Angle adjust
-        <Col Span="12">
-        <Slider Disabled="@_pitchAutoSwitch" TValue="double" Min="1" Max="20" @bind-Value="@pitchValue" />
-        </Col>
-        <Col Span="4">
-        <AntDesign.InputNumber Disabled="@_pitchAutoSwitch" Min="1" Max="20" Style="margin:0 16px;" @bind-Value="@pitchValue" TValue="double" />
-        </Col>
-        <Col Span="4">
+    </GridCol>
+    <GridCol Span="4">
+        <h5>Change interval</h5>
+        <Slider Disabled="@(!Status.Sending.GetValueOrDefault())" TValue="double" Min="1" Max="60" @bind-Value="@newInterval" />
+        <AntDesign.InputNumber Disabled="@(!Status.Sending.GetValueOrDefault())" Min="1" Max="60" Style="margin:0 16px;" @bind-Value="@newInterval" TValue="double" />
         <div style="margin-top: 12px;">
-            <Popconfirm Placement="@Placement.Right" Title="@_title" OkText="@_okText" CancelText="@_cancelText" OnConfirm="pitchControlComfirm">
-                <Button Disabled="@_pitchAutoSwitch" Type="@ButtonType.Primary"
-                        Loading="@_isPitchControlLoading">
+            <Popconfirm Placement="@Placement.Right" Title="@_title" OkText="@_okText" CancelText="@_cancelText" OnConfirm="ChangeIntervalComfirm">
+                <Button Disabled="@(!Status.Sending.GetValueOrDefault())" Type="@ButtonType.Primary"
+                        Loading="@_isIntervalLoading">
                     Comfirm
                 </Button>
             </Popconfirm>
         </div>
-        </Col>
     </GridCol>
-
-    <GridCol Span="6" Offset="1">
-        <h3>Break</h3>
-        <h5>
-            Auto Mode
-            <Switch CheckedChildren="On" UnCheckedChildren="Off" Checked="@_breakAutoSwitch" Loading="@_isBreakModeLoading" Control OnClick="breakModeSwitch" />
-        </h5>
-        <br />
-        Break power
-        <Col Span="12">
-        <Slider Disabled="@_breakAutoSwitch" TValue="double" Min="1" Max="20" @bind-Value="@breakValue" />
-        </Col>
-        <Col Span="4">
-        <AntDesign.InputNumber Disabled="@_breakAutoSwitch" Min="1" Max="20" Style="margin:0 16px;" @bind-Value="@breakValue" TValue="double" />
-        </Col>
-        <Col Span="4">
-        <div style="margin-top: 12px;">
-            <Popconfirm Placement="@Placement.Right" Title="@_title" OkText="@_okText" CancelText="@_cancelText" OnConfirm="breakControlComfirm">
-                <Button Disabled="@_breakAutoSwitch" Type="@ButtonType.Primary"
-                        Loading="@_isBreakControlLoading">
-                    Comfirm
-                </Button>
-            </Popconfirm>
-        </div>
-        </Col>
-    </GridCol>
-    <Divider />
-
-
 </GridRow>
-
-<SystemStatus></SystemStatus>
-
+<Divider/>
+<SystemStatus @bind-Status="Status"></SystemStatus>
 
 @code {
-    private string _cancelText = "No";
-    private string _okText = "Yes";
-    private string _title = "Are you sure?";
+    string _cancelText = "No";
+    string _okText = "Yes";
+    string _title = "Are you sure?";
 
-    bool _pitchAutoSwitch;
-    bool _isPitchModeLoading = false;
-    bool _isPitchControlLoading;
-    double pitchValue;
-    async Task pitchModeSwitch()
+    RpiStatusModel Status = new RpiStatusModel();
+
+    bool _isSendingLoading = false;
+    bool _isIntervalLoading;
+    double newInterval;
+    async Task SendingSwitch()
     {
-        if (!_isPitchModeLoading)
+        if (!_isSendingLoading)
         {
-            _isPitchModeLoading = true;
-            await Task.Delay(1000);
-            _pitchAutoSwitch = !_pitchAutoSwitch;
-            _isPitchModeLoading = false;
+            _isSendingLoading = true;
+            bool check;
+            if (Status.Sending.GetValueOrDefault())
+                check = await systemControlService.StopSendingAsync();
+            else
+                check = await systemControlService.StartSendingAsync();
+            if (check)
+                Status.Sending = !Status.Sending;
+            _isSendingLoading = false;
         }
     }
 
-    private async Task pitchControlComfirm()
+    private async Task ChangeIntervalComfirm()
     {
-        _isPitchControlLoading = true;
-        await Task.Delay(1000);
-        _isPitchControlLoading = false;
+        _isIntervalLoading = true;
+        await systemControlService.ChangeSendingIntervalAsync((float)newInterval);
+        Status.Interval = (float)newInterval;
+        _isIntervalLoading = false;
     }
-
-    bool _breakAutoSwitch;
-    bool _isBreakModeLoading = false;
-    bool _isBreakControlLoading;
-    double breakValue;
-    async Task breakModeSwitch()
-    {
-        if (!_isBreakModeLoading)
-        {
-            _isBreakModeLoading = true;
-            await Task.Delay(1000);
-            _breakAutoSwitch = !_breakAutoSwitch;
-            _isBreakModeLoading = false;
-        }
-    }
-
-    private async Task breakControlComfirm()
-    {
-        _isBreakControlLoading = true;
-        await Task.Delay(1000);
-        _isBreakControlLoading = false;
-    }
-
 }
-
