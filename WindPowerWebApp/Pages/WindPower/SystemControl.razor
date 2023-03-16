@@ -10,7 +10,7 @@
     <GridCol Span="4">
         <h5 style="margin:20px">
             Sending
-            <Switch CheckedChildren="On" UnCheckedChildren="Off" Checked="@Status.Sending.GetValueOrDefault()" Loading="@_isSendingLoading" OnClick="SendingSwitch" Disabled="@Status.Online.GetValueOrDefault()"/>
+            <Switch CheckedChildren="On" UnCheckedChildren="Off" Checked="@Status.Sending.GetValueOrDefault()" Loading="@_isSendingLoading" OnClick="SendingSwitch" Disabled="@(!Status.Online.GetValueOrDefault())"/>
         </h5>
     </GridCol>
     <GridCol Span="4">
