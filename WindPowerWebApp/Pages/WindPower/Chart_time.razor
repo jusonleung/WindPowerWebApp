@@ -65,7 +65,7 @@
 
     protected override void OnInitialized()
     {
-        RawData = sqlDbService.GetAllSystemData();
+        RawData = sqlDbService.GetAllSystemData().Where(d => d.Current_generator != null && d.Current_inverter != null && d.Voltage_generator != null && d.Voltage_inverter != null && d.RPM != null && d.WindSpeed != null).ToList();
         SelectedData = SplitAndSmoothDataList(RawData, interval).Select(d => new DataModelForChart(d)).ToList();
         RangePicker[0] = SelectedData.FirstOrDefault().DateTime;
         RangePicker[1] = SelectedData.LastOrDefault().DateTime;

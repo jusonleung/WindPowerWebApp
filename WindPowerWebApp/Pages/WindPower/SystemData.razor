@@ -104,7 +104,7 @@
 
         foreach (var f in NumFilterList)
         {
-            var propValues = FilteredData.Select(d => (float)f.Prop.GetValue(d));
+            var propValues = FilteredData.Select(d => (float?)f.Prop.GetValue(d));
             f.SelectedRange = f.MaxMinRange = ((int)propValues.Min(), (int)propValues.Max() + 1);
         }
         _total = FilteredData.Count;
