@@ -65,7 +65,7 @@
 
     protected override void OnInitialized()
     {
-        RawData = sqlDbService.GetAllSystemData().Where(d => d.Current_generator != null && d.Current_inverter != null && d.Voltage_generator != null && d.Voltage_inverter != null && d.RPM != null && d.WindSpeed != null).ToList();
+        RawData = sqlDbService.GetAllSystemData().Where(d => d.Current_generator != null && d.Current_battery != null && d.Voltage_generator != null && d.Voltage_battery != null && d.RPM != null && d.WindSpeed != null).ToList();
         SelectedData = SplitAndSmoothDataList(RawData, interval).Select(d => new DataModelForChart(d)).ToList();
         RangePicker[0] = SelectedData.FirstOrDefault().DateTime;
         RangePicker[1] = SelectedData.LastOrDefault().DateTime;
@@ -91,8 +91,8 @@
                     DateTime = g.Key,
                     Voltage_generator = g.Average(d => d.Voltage_generator),
                     Current_generator = g.Average(d => d.Current_generator),
-                    Voltage_inverter = g.Average(d => d.Voltage_inverter),
-                    Current_inverter = g.Average(d => d.Current_inverter),
+                    Voltage_battery = g.Average(d => d.Voltage_battery),
+                    Current_battery = g.Average(d => d.Current_battery),
                     RPM = g.Average(d => d.RPM),
                     WindSpeed = g.Average(d => d.WindSpeed)
                 })
@@ -139,8 +139,8 @@
                     float voltage_generator = dataList[indexBefore].Voltage_generator.Value + fraction * (dataList[indexAfter].Voltage_generator.Value - dataList[indexBefore].Voltage_generator.Value);
                     float current_generator = dataList[indexBefore].Current_generator.Value + fraction * (dataList[indexAfter].Current_generator.Value - dataList[indexBefore].Current_generator.Value);
 
-                    float voltage_inverter = dataList[indexBefore].Voltage_inverter.Value + fraction * (dataList[indexAfter].Voltage_inverter.Value - dataList[indexBefore].Voltage_inverter.Value);
-                    float current_inverter = dataList[indexBefore].Current_inverter.Value + fraction * (dataList[indexAfter].Current_inverter.Value - dataList[indexBefore].Current_inverter.Value);
+                    float voltage_battery = dataList[indexBefore].Voltage_battery.Value + fraction * (dataList[indexAfter].Voltage_battery.Value - dataList[indexBefore].Voltage_battery.Value);
+                    float current_battery = dataList[indexBefore].Current_battery.Value + fraction * (dataList[indexAfter].Current_battery.Value - dataList[indexBefore].Current_battery.Value);
 
                     float rpm = dataList[indexBefore].RPM.Value + fraction * (dataList[indexAfter].RPM.Value - dataList[indexBefore].RPM.Value);
                     float windSpeed = dataList[indexBefore].WindSpeed.Value + fraction * (dataList[indexAfter].WindSpeed.Value - dataList[indexBefore].WindSpeed.Value);
@@ -150,8 +150,8 @@
                             DateTime = currentTime,
                             Voltage_generator = voltage_generator,
                             Current_generator = current_generator,
-                            Voltage_inverter = voltage_inverter,
-                            Current_inverter = current_inverter,
+                            Voltage_battery = voltage_battery,
+                            Current_battery = current_battery,
                             RPM = rpm,
                             WindSpeed = windSpeed
                         });

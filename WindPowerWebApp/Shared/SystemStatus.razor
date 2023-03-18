@@ -44,11 +44,11 @@
     <DescriptionsItem Title="Current">@Status.SystemData.NullorAddUnit(Status.SystemData.Current_generator," A")</DescriptionsItem>
     <DescriptionsItem Title="Power">@Status.SystemData.NullorAddUnit(Status.SystemData.Voltage_generator*Status.SystemData.Current_generator," W")</DescriptionsItem>
 </Descriptions>
-<h6 style="margin-top:10px">Inverter</h6>
+<h6 style="margin-top:10px">Battery</h6>
 <Descriptions Bordered Size="small">
-    <DescriptionsItem Title="Voltage">@Status.SystemData.NullorAddUnit(Status.SystemData.Voltage_inverter," V")</DescriptionsItem>
-    <DescriptionsItem Title="Current">@Status.SystemData.NullorAddUnit(Status.SystemData.Current_inverter," A")</DescriptionsItem>
-    <DescriptionsItem Title="Power">@Status.SystemData.NullorAddUnit(Status.SystemData.Voltage_inverter*Status.SystemData.Current_inverter," W")</DescriptionsItem>
+    <DescriptionsItem Title="Voltage">@Status.SystemData.NullorAddUnit(Status.SystemData.Voltage_battery," V")</DescriptionsItem>
+    <DescriptionsItem Title="Current">@Status.SystemData.NullorAddUnit(Status.SystemData.Current_battery," A")</DescriptionsItem>
+    <DescriptionsItem Title="Power">@Status.SystemData.NullorAddUnit(Status.SystemData.Voltage_battery*Status.SystemData.Current_battery," W")</DescriptionsItem>
 </Descriptions>
 
 @code {

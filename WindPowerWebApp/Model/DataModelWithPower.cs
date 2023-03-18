@@ -6,19 +6,19 @@ namespace WindPowerWebApp.Model
     {
         [DisplayName("Generator Power (W)")]
         public float? Power_generator { get; set; }
-        [DisplayName("Inverter Power (W)")]
-        public float? Power_inverter { get; set; }
+        [DisplayName("Battery Power (W)")]
+        public float? Power_battery { get; set; }
         public DataModelWithPower(DataModel data)
         {
             this.DateTime = data.DateTime;
             this.Current_generator = data.Current_generator;
             this.Voltage_generator = data.Voltage_generator;
-            this.Current_inverter = data.Current_inverter;
-            this.Voltage_inverter = data.Voltage_inverter;
+            this.Current_battery = data.Current_battery;
+            this.Voltage_battery = data.Voltage_battery;
             this.RPM = data.RPM;
             this.WindSpeed = data.WindSpeed;
             this.Power_generator = this.Current_generator * this.Voltage_generator ?? null;
-            this.Power_inverter = this.Current_inverter * this.Voltage_inverter ?? null;
+            this.Power_battery = this.Current_battery * this.Voltage_battery ?? null;
             this.Longitude = data.Longitude;
             this.Latitude = data.Latitude;
         }
